@@ -18,4 +18,6 @@ public interface FilmStorage {
     public void addLike(Film film, User user);
 
     public void removeLike(Film film, User user);
+
+    public void removeFilm(Film film);
 }

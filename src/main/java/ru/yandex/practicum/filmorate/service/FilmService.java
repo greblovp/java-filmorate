@@ -74,6 +74,14 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+    public void deleteFilm(int filmId) {
+        Film film = checkFilmId(filmId);
+
+        filmStorage.removeFilm(film);
+
+        log.debug("Удален фильм: {}", film);
+    }
+
     private int compare(Film f0, Film f1) {
         return -1 * (f0.getLikes().size() - f1.getLikes().size()); //обратный порядок
     }

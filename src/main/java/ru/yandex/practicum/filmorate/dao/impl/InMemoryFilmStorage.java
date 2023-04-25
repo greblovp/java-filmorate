@@ -16,4 +16,8 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
     public void removeLike(Film film, User user) {
         film.getLikes().remove(user.getId());
     }
+
+    @Deprecated
+    public void removeFilm(Film film) {
+    }
 }

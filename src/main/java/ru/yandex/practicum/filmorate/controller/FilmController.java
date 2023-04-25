@@ -75,6 +75,12 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
+    @DeleteMapping("/{filmId}")
+    public void deleteFilm(@PathVariable int filmId) {
+        log.info("Удаляем фильм: {}", filmId);
+        filmService.deleteFilm(filmId);
+    }
+
     private void generateCustomValidateException(Film film, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.warn("Ошибка в заполнении поля {} - {}. Фильм - {}", bindingResult.getFieldError().getField(),
