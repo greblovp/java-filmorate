@@ -6,9 +6,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.DirectorStorage;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.GenreStorage;
 import ru.yandex.practicum.filmorate.dao.MPAStorage;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
@@ -27,7 +29,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final GenreStorage genreStorage;
     private final MPAStorage mpaStorage;
-
+    private final DirectorStorage directorStorage;
 
     @Override
     public Collection<Film> get() {
@@ -162,6 +164,33 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, film.getId(), user.getId());
     }
 
+    @Override
+    public Collection<Film> getFilmsByDirector(int directorId, String sortType) {
+        String queryFilmsSelect = "SELECT * " +
+                "FROM film AS f " +
+                "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +
+                "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
+                "WHERE d.director_id = ?;";
+
+        List<Film> allFilmsByDirector = jdbcTemplate.query(queryFilmsSelect, (rs, rowNum) -> makeFilm(rs), directorId);
+
+        if (sortType.equals("year")) {
+            Collections.sort(allFilmsByDirector,
+                    (film1, film2) -> {
+                        if (film1.getReleaseDate().isAfter(film2.getReleaseDate())) {
+                            return 1;
+                        } else {
+                            return -1;
+                        }
+                    });
+        } else {
+            Collections.sort(allFilmsByDirector,
+                    Comparator.comparingInt(film -> film.getLikes().size()));
+        }
+
+        return allFilmsByDirector;
+    }
+
     public void removeFilm(int filmId) {
         String sqlQuery =
                 "DELETE FROM film " +
@@ -180,6 +209,7 @@ public class FilmDbStorage implements FilmStorage {
                 .mpa(mpaStorage.getById(rs.getInt("rating_id")).orElseGet(null))
                 .genres(getGenresByFilmId(filmId))
                 .likes(getLikesByFilmId(filmId))
+                .directors(getDirectorsByFilmId(filmId))
                 .build();
         film.setId(filmId);
         return film;
@@ -208,4 +238,16 @@ public class FilmDbStorage implements FilmStorage {
         return new HashSet<>(likes);
     }
 
+    private Set<Director> getDirectorsByFilmId(int filmId) {
+        String queryFilmXDirectorSelect = "SELECT director_id " +
+                "FROM film_x_director " +
+                "WHERE film_id = ?;";
+
+        List<Integer> directorsIds = jdbcTemplate.queryForList(queryFilmXDirectorSelect, Integer.class, filmId);
+
+        List<Director> allDirectors = directorStorage.get();
+        return allDirectors.stream()
+                .filter(director -> directorsIds.contains(director.getId()))
+                .collect(Collectors.toSet());
+    }
 }

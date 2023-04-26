@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
@@ -74,6 +76,11 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+    public Collection<Film> getFilmsByDirector(int directorId, String sortType) {
+        checkSortType(sortType);
+        return filmStorage.getFilmsByDirector(directorId, sortType);
+    }
+
     public void removeFilm(int filmId) {
         Film film = checkFilmId(filmId);
 
@@ -92,5 +99,11 @@ public class FilmService {
 
     private Film checkFilmId(int id) {
         return filmStorage.getById(id).orElseThrow(() -> new FilmNotFoundException("Фильм с ID = " + id + " не найден."));
+    }
+
+    private void checkSortType(String sortType) {
+        if (!sortType.equals("year") || !sortType.equals("likes")) {
+            throw new FilmValidationException("Некорректно введен параметр сортировки.");
+        }
     }
 }
