@@ -30,6 +30,8 @@ class UserControllerTest {
     @MockBean
     private ValidateService validateService;
     @MockBean
+    private EventService eventService;
+    @MockBean
     private FilmService filmService;
     @MockBean
     private MPAService mpaService;
