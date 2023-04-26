@@ -31,4 +31,5 @@ public class Film extends BaseModel {
     private Set<Integer> likes;
     private Set<Genre> genres;
     private MPA mpa;
+    private Set<Director> directors;
 }
