@@ -69,6 +69,12 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
+    @GetMapping("director/{directorId}?sortBy={sortType}")
+    public Collection<Film> findFilmsByDirector(@RequestParam int directorId, @RequestParam String sortType) {
+        log.info("Вывести все фильмы режиссера {} с сортировкой по {}", directorId, sortType);
+        return filmService.getFilmsByDirector(directorId, sortType);
+    }
+
     private void generateCustomValidateException(Film film, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.warn("Ошибка в заполнении поля {} - {}. Фильм - {}", bindingResult.getFieldError().getField(),

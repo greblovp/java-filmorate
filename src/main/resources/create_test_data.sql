@@ -66,3 +66,14 @@ insert into film_like (film_id, user_id)
 values (2,4);
 insert into film_like (film_id, user_id)
 values (3,3);
+
+insert into director (director_id, name)
+values(1, 'Director1'),
+      (2, 'Director2'),
+      (3, 'Director3');
+
+insert into film_x_director (film_id, director_id)
+values (1, 1),
+       (2, 2),
+       (3, 3),
+       (3, 2);

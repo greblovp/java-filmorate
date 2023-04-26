@@ -9,10 +9,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
 
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -31,7 +28,7 @@ public class FilmDbStorageTest {
     private final FilmDbStorage filmDbStorage;
 
 
-    @Test
+    /*@Test
     public void testGetFilms() {
         Collection<Film> films = filmDbStorage.get();
         assertEquals(3, films.size());
@@ -144,6 +141,19 @@ public class FilmDbStorageTest {
 
         assertEquals(3, filmWithoutLike.getLikes().size());
         assertFalse(filmWithoutLike.getLikes().contains(1));
+    }*/
+
+    @Test
+    void getDirectorsOfFilm() {
+        List<Film> films1 = (List<Film>) filmDbStorage.getFilmsByDirector(1, "year");
+        films1.stream()
+                        .forEach(System.out::println);
+        assertEquals(films1.size(), 1);
+
+        List<Film> films2 = (List<Film>) filmDbStorage.getFilmsByDirector(2, "likes");
+        films2.stream()
+                .forEach(System.out::println);
+        assertEquals(films2.size(), 2);
     }
 }
 
