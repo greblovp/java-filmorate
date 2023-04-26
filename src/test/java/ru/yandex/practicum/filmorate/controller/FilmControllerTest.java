@@ -30,6 +30,8 @@ class FilmControllerTest {
     @MockBean
     private ValidateService validateService;
     @MockBean
+    private EventService eventService;
+    @MockBean
     private UserService userService;
     @MockBean
     private MPAService mpaService;
@@ -43,7 +45,7 @@ class FilmControllerTest {
 
     @SneakyThrows
     @Test
-    void testgetFilms() {
+    void testGetFilms() {
         Film filmToCreate = Film.builder().name("name").description("description").releaseDate(LocalDate.of(2000, 1, 1)).duration(100).build();
         when(filmService.findAll()).thenReturn(List.of(filmToCreate));
 
