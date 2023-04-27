@@ -162,12 +162,12 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, film.getId(), user.getId());
     }
 
-    public void removeFilm(Film film) {
+    public void removeFilm(int filmId) {
         String sqlQuery =
                 "DELETE FROM film " +
                         "WHERE film_id = ?";
 
-        jdbcTemplate.update(sqlQuery, film.getId());
+        jdbcTemplate.update(sqlQuery, filmId);
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {

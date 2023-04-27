@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
@@ -208,5 +209,24 @@ class UserServiceTest {
 
         verify(userStorage).getById(userId);
         assertEquals(0, friends.size());
+    }
+
+    @Test
+    public void testRemoveUser() {
+        when(userStorage.getById(userId)).thenReturn(Optional.of(user));
+
+        userService.removeUser(userId);
+
+        verify(userStorage).getById(userId);
+        verify(userStorage).removeUser(userId);
+    }
+
+    @Test
+    public void testRemoveUserWhenUserIsNull() {
+        when(userStorage.getById(userId)).thenReturn(Optional.empty());
+
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> userService.removeUser(userId));
+        verify(userStorage).getById(userId);
+        assertEquals(exception.getMessage(), "Пользователь с ID = " + userId + " не найден.");
     }
 }

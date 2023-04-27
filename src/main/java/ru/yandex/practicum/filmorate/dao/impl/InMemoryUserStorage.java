@@ -15,4 +15,8 @@ public class InMemoryUserStorage extends BaseModelStorage<User> implements UserS
     public void removeFriend(User user, User friend) {
         user.getFriends().remove(friend.getId());
     }
+
+    @Deprecated
+    public void removeUser(int userId) {
+    }
 }

@@ -145,6 +145,16 @@ public class FilmDbStorageTest {
         assertEquals(3, filmWithoutLike.getLikes().size());
         assertFalse(filmWithoutLike.getLikes().contains(1));
     }
+
+    @Test
+    public void testRemoveFilm() {
+        Film film = filmDbStorage.getById(1).orElse(null);
+        assertNotNull(film);
+
+        filmDbStorage.removeFilm(1);
+        film = filmDbStorage.getById(1).orElse(null);
+        assertNull(film);
+    }
 }
 
 

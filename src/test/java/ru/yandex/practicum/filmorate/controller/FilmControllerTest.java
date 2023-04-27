@@ -163,4 +163,14 @@ class FilmControllerTest {
         verify(eventService, times(1)).createEvent(userId, EventType.LIKE, ActionType.REMOVE, filmId);
     }
 
+    @Test
+    @SneakyThrows
+    public void testRemoveFilm() {
+        int filmId = 1;
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/films/" + filmId))
+                .andExpect(status().isOk());
+        verify(filmService, times(1)).removeFilm(filmId);
+    }
+
 }

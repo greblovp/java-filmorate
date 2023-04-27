@@ -18,6 +18,6 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
     }
 
     @Deprecated
-    public void removeFilm(Film film) {
+    public void removeFilm(int filmId) {
     }
 }

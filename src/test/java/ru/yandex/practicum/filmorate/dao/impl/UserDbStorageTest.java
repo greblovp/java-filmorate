@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -127,6 +128,16 @@ class UserDbStorageTest {
 
         assertEquals(1, userWithOutFriend.getFriends().size());
         assertFalse(userWithOutFriend.getFriends().contains(3));
+    }
+
+    @Test
+    public void testRemoveUser() {
+        User user = userDbStorage.getById(1).orElse(null);
+        assertNotNull(user);
+
+        userDbStorage.removeUser(1);
+        user = userDbStorage.getById(1).orElse(null);
+        assertNull(user);
     }
 
 }

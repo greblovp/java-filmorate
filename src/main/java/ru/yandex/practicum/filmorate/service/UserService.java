@@ -84,6 +84,14 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public void removeUser (int userId) {
+        User user = checkUserId(userId);
+
+        userStorage.removeUser(userId);
+
+        log.debug("Удален пользователь {}", user);
+    }
+
     private User checkUserId(int id) {
         return userStorage.getById(id).orElseThrow(()
                 -> new UserNotFoundException("Пользователь с ID = " + id + " не найден."));

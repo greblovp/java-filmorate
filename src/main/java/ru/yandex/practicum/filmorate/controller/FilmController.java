@@ -76,9 +76,9 @@ public class FilmController {
     }
 
     @DeleteMapping("/{filmId}")
-    public void deleteFilm(@PathVariable int filmId) {
+    public void removeFilm(@PathVariable int filmId) {
         log.info("Удаляем фильм: {}", filmId);
-        filmService.deleteFilm(filmId);
+        filmService.removeFilm(filmId);
     }
 
     private void generateCustomValidateException(Film film, BindingResult bindingResult) {

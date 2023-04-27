@@ -74,10 +74,10 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteFilm(int filmId) {
+    public void removeFilm(int filmId) {
         Film film = checkFilmId(filmId);
 
-        filmStorage.removeFilm(film);
+        filmStorage.removeFilm(filmId);
 
         log.debug("Удален фильм: {}", film);
     }
