@@ -217,7 +217,7 @@ public class FilmDbStorage implements FilmStorage {
                     "FROM film f " +
                     "LEFT JOIN film_like fl ON f.film_id=fl.film_id " +
                     "WHERE EXTRACT (year FROM f.release_dt) = ? " +
-                    "GROUP BY f.film_id " +
+                    "GROUP BY f.film_id, f.name, f.description, f.release_dt, f.duration, f.rating_id " +
                     "ORDER BY likes DESC, film_id " +
                     "LIMIT ?";
             films = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), year, count);
@@ -229,7 +229,7 @@ public class FilmDbStorage implements FilmStorage {
                     "LEFT JOIN film_like fl ON f.film_id=fl.film_id " +
                     "JOIN film_x_genre fg ON f.film_id=fg.film_id " +
                     "WHERE fg.genre_id = ? " +
-                    "GROUP BY f.film_id " +
+                    "GROUP BY f.film_id, f.name, f.description, f.release_dt, f.duration, f.rating_id " +
                     "ORDER BY likes DESC, film_id " +
                     "LIMIT ?";
             films = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), genreId, count);
@@ -242,7 +242,7 @@ public class FilmDbStorage implements FilmStorage {
                     "JOIN film_x_genre fg ON f.film_id=fg.film_id " +
                     "WHERE fg.genre_id = ? " +
                     "AND EXTRACT (year FROM f.release_dt) = ? " +
-                    "GROUP BY f.film_id " +
+                    "GROUP BY f.film_id, f.name, f.description, f.release_dt, f.duration, f.rating_id " +
                     "ORDER BY likes DESC, film_id " +
                     "LIMIT ?";
             films = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), genreId, year, count);

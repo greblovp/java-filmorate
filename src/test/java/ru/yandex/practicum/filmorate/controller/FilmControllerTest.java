@@ -159,4 +159,18 @@ class FilmControllerTest {
         verify(filmService, times(1)).removeLike(filmId, userId);
     }
 
+    @Test
+    @SneakyThrows
+    public void testGetPopularByGenreAndYear() {
+        int count = 5;
+        int genreId = 1;
+        int year = 1999;
+        when(filmService.getPopularFilmsByGenreAndYear(count, genreId, year)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/films/popular?count=" + count + "&genreId=" + genreId +
+                        "&year=" + year))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+        verify(filmService, times(1)).getPopularFilmsByGenreAndYear(count, genreId, year);
+    }
 }

@@ -211,4 +211,15 @@ class FilmServiceTest {
 
         assertThrows(FilmNotFoundException.class, () -> filmService.updateFilm(film));
     }
+
+    @Test
+    public void testPopularByGenreAndYear() {
+        when(filmStorage.getPopularByGenreAndYear(10, 0, 2010)).thenReturn(List.of(popularFilm));
+
+        Collection<Film> top = filmService.getPopularFilmsByGenreAndYear(10, 0, 2010);
+
+        verify(filmStorage).getPopularByGenreAndYear(10, 0, 2010);
+        assertEquals(1, top.size());
+        assertEquals(List.of(popularFilm), top);
+    }
 }
