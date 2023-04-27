@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NonNull;
 
 
-
 @Data
 @AllArgsConstructor
 public class Review {
