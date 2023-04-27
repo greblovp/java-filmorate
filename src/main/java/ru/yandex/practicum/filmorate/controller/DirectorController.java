@@ -32,21 +32,21 @@ public class DirectorController {
 
     @PostMapping
     public Director create(@RequestBody @Valid Director director) {
-        log.info("Добавить режиссера {}", director.getName());
+        log.info("Добавить режиссера {}.", director.getName());
         validateService.validateDirector(director);
         return directorService.create(director);
     }
 
     @PutMapping
     public Director update(@RequestBody @Valid Director director) {
-        log.info("Обновить режиссера с id = {}", director.getId());
+        log.info("Обновить режиссера с id = {}.", director.getId());
         validateService.validateDirector(director);
         return directorService.udpate(director);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) {
-        log.info("Удалить режиссера с id = {}", id);
+        log.info("Удалить режиссера с id = {}.", id);
         directorService.delete(id);
     }
 }

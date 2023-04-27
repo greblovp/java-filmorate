@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.dao.DirectorStorage;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.GenreStorage;
 import ru.yandex.practicum.filmorate.dao.MPAStorage;
-import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -97,8 +96,7 @@ public class FilmDbStorage implements FilmStorage {
             String queryDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
                     "VALUES(?, ?);";
 
-            film.getDirectors().forEach(director ->
-            {
+            film.getDirectors().forEach(director -> {
                 jdbcTemplate.update(queryDirectorInsert, filmId, director.getId());
             });
         }
@@ -182,7 +180,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getFilmsByDirector(int directorId, String sortType) {
+    public Collection<Film> getFilmsByDirector(int directorId, String sortBy) {
         directorStorage.checkIfDirectorExists(directorId);
         String queryFilmsSelect = "SELECT * " +
                 "FROM film AS f " +
@@ -192,7 +190,7 @@ public class FilmDbStorage implements FilmStorage {
 
         List<Film> allFilmsByDirector = jdbcTemplate.query(queryFilmsSelect, (rs, rowNum) -> makeFilm(rs), directorId);
 
-        if (sortType.equals("year")) {
+        if (sortBy.equals("year")) {
             Collections.sort(allFilmsByDirector,
                     (film1, film2) -> {
                         if (film1.getReleaseDate().isAfter(film2.getReleaseDate())) {

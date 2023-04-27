@@ -37,6 +37,8 @@ class UserControllerTest {
     private MPAService mpaService;
     @MockBean
     private GenreService genreService;
+    @MockBean
+    private DirectorService directorService;
 
     @Autowired
     private ObjectMapper objectMapper;
