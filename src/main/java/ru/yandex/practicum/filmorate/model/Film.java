@@ -19,7 +19,8 @@ public class Film extends BaseModel {
     //название — name;
     //описание — description;
     //дата релиза — releaseDate;
-    //продолжительность фильма — duration.
+    //продолжительность фильма — duration;
+    //режиссеры - directors.
     @NotBlank
     private String name;
     @Size(max = 200, message = "Не более 200 знаков")

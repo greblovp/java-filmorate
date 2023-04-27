@@ -34,11 +34,11 @@ public class FilmController {
         return filmService.findById(filmId);
     }
 
-    @GetMapping("/popular")
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
-        log.info("Вывести ТОП {} фильмов", count);
-        return filmService.getTop(count);
-    }
+//    @GetMapping("/popular")
+//    public Collection<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
+//        log.info("Вывести ТОП {} фильмов", count);
+//        return filmService.getTop(count);
+//    }
 
     @PutMapping("/{filmId}/like/{userId}")
     public void addLike(@PathVariable int filmId, @PathVariable int userId) {
@@ -73,6 +73,19 @@ public class FilmController {
     public Collection<Film> findFilmsByDirector(@PathVariable int directorId, @RequestParam String sortBy) {
         log.info("Вывести все фильмы режиссера {} с сортировкой по {}.", directorId, sortBy);
         return filmService.getFilmsByDirector(directorId, sortBy);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilmsByGenreAndYear(@RequestParam(defaultValue = "10") int count,
+                                                          @RequestParam(required = false) String genreId,
+                                                          @RequestParam(required = false) String year) {
+        if (genreId == null && year == null) {
+            log.info("Вывести ТОП {} фильмов", count);
+            return filmService.getTop(count);
+        }
+        log.info("Получаем список из {} популярных фильмов", count);
+        return filmService.getPopularFilmsByGenreAndYear(count, genreId == null?0:Integer.parseInt(genreId),
+                year==null?0:Integer.parseInt(year));
     }
 
     private void generateCustomValidateException(Film film, BindingResult bindingResult) {

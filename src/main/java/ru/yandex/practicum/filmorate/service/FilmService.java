@@ -80,6 +80,10 @@ public class FilmService {
         return filmStorage.getFilmsByDirector(directorId, sortBy);
     }
 
+    public Collection<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year) {
+        return filmStorage.getPopularByGenreAndYear(count, genreId, year);
+    }
+
     private int compare(Film f0, Film f1) {
         return -1 * (f0.getLikes().size() - f1.getLikes().size()); //обратный порядок
     }

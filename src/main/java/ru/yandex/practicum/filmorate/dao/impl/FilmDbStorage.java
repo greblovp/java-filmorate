@@ -207,6 +207,41 @@ public class FilmDbStorage implements FilmStorage {
         return allFilmsByDirector;
     }
 
+    public Collection<Film> getPopularByGenreAndYear(int count, int genreId, int year) {
+        String sqlQuery;
+        List<Film> films;
+
+        if (genreId == 0) {
+            sqlQuery = "SELECT * " +
+                    "FROM film f " +
+                    "WHERE EXTRACT (year FROM f.release_dt) = ? " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), year, count);
+
+        } else if(year == 0) {
+            sqlQuery = "SELECT * " +
+                    "FROM film f " +
+                    "JOIN film_x_genre fg ON f.film_id=fg.film_id " +
+                    "WHERE fg.genre_id = ? " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), genreId, count);
+
+        } else {
+            sqlQuery = "SELECT * " +
+                    "FROM film f " +
+                    "JOIN film_x_genre fg ON f.film_id=fg.film_id " +
+                    "WHERE fg.genre_id = ? " +
+                    "AND EXTRACT (year FROM f.release_dt) = ? " +
+                    "LIMIT ?";
+            films = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), genreId, year, count);
+        }
+
+        if (films.isEmpty()) {
+            log.info("Популярные фильмы с жанром {} и годом {} не найдены.", genreId, year);
+        }
+        return films;
+    }
+
     private Film makeFilm(ResultSet rs) throws SQLException {
         int filmId = rs.getInt("film_id");
         Film film = Film.builder()

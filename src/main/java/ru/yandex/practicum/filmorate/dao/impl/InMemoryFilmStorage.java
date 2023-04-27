@@ -19,6 +19,11 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
         film.getLikes().remove(user.getId());
     }
 
+    @Deprecated
+    public Collection<Film> getPopularByGenreAndYear(int count, int genreId, int year) {
+        return null;
+    }
+
     @Override
     public Collection<Film> getFilmsByDirector(int directorId, String sortType) {
         return null; // это заглушка
