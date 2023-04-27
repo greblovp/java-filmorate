@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.service.ValidateService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -21,6 +22,12 @@ public class FilmController {
 
     private final FilmService filmService;
     private final ValidateService validateService;
+
+    @GetMapping("/search?query={query}&by=director,title")
+    public Collection<Film> search(@PathVariable String query, @RequestParam(name="by") List<String> by) {
+        log.info("Вывести фильмы по условиям" + by);
+        return filmService.searchFilms(query, by.contains("director"), by.contains("film"));
+    }
 
     @GetMapping
     public Collection<Film> findAll() {

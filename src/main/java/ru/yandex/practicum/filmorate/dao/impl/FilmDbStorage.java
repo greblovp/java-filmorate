@@ -41,6 +41,18 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> search(String query, Boolean director, Boolean film) {
+        StringBuilder sqlQuery = new StringBuilder();
+        sqlQuery.append("SELECT *" +
+                        "FROM film " +
+                "WHERE 1=1");
+        if (director) sqlQuery.append("AND director ILIKE '%").append(query).append("%'");
+        if (film) sqlQuery.append("AND description ILIKE '%").append(query).append("%'");
+
+        return jdbcTemplate.query(sqlQuery.toString(), (rs, rowNum) -> makeFilm(rs));
+    }
+
+    @Override
     public Optional<Film> getById(int id) {
         String sqlQuery =
                 "SELECT * " +

@@ -7,17 +7,19 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface FilmStorage {
-    public Collection<Film> get();
+    Collection<Film> get();
 
-    public Optional<Film> getById(int id);
+    Collection<Film> search(String query, Boolean director, Boolean film);
 
-    public Film create(Film film);
+    Optional<Film> getById(int id);
 
-    public Optional<Film> update(Film film);
+    Film create(Film film);
 
-    public void addLike(Film film, User user);
+    Optional<Film> update(Film film);
 
-    public void removeLike(Film film, User user);
+    void addLike(Film film, User user);
+
+    void removeLike(Film film, User user);
 
     Collection<Film> getFilmsByDirector(int directorId, String sortType);
 }

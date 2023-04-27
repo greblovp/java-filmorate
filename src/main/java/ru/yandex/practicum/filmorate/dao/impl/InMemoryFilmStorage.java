@@ -10,6 +10,11 @@ import java.util.Collection;
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmStorage {
     @Override
+    public Collection<Film> search(String query, Boolean director, Boolean film) {
+        throw new UnsupportedOperationException("Реализация метода существует только при работе с БД");
+    }
+
+    @Override
     public void addLike(Film film, User user) {
         film.getLikes().add(user.getId());
     }
