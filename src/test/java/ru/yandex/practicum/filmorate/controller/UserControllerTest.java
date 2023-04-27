@@ -258,14 +258,4 @@ class UserControllerTest {
         verify(userService, times(1)).removeUser(userId);
     }
 
-    @Test
-    @SneakyThrows
-    public void testRemoveUser() {
-        int userId = 1;
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/users/" + userId))
-                .andExpect(status().isOk());
-        verify(userService, times(1)).removeUser(userId);
-    }
-
 }
