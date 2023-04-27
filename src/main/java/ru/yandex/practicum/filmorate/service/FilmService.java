@@ -94,7 +94,7 @@ public class FilmService {
     }
 
     private void checkSortType(String sortType) {
-        if (!sortType.equals("year") || !sortType.equals("likes")) {
+        if (!sortType.equals("year") && !sortType.equals("likes")) {
             throw new FilmValidationException("Некорректно введен параметр сортировки.");
         }
     }
