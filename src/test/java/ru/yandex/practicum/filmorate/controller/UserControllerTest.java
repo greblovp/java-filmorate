@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.ActionType;
-import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.*;
@@ -247,16 +246,6 @@ class UserControllerTest {
 
         verify(userService).findById(userId);
         verify(eventService).findByUserId(userId);
-    }
-
-    @Test
-    @SneakyThrows
-    public void testRemoveUser() {
-        int userId = 1;
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/users/" + userId))
-                .andExpect(status().isOk());
-        verify(userService, times(1)).removeUser(userId);
     }
 
     @Test

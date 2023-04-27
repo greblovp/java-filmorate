@@ -67,6 +67,11 @@ values (2,4);
 insert into film_like (film_id, user_id)
 values (3,3);
 
+insert into event (user_id, event_type, action_type, entity_id, event_dttm)
+values (1,'LIKE','ADD',1,now());
+insert into event (user_id, event_type, action_type, entity_id, event_dttm)
+values (1,'FRIEND','REMOVE',2,now());
+
 insert into review (creator_user_id, reviewed_film_id, content, is_positive) --1 (score: 2)
 values (1, 1, 'Ничо так, могли бы и лучше.', true);
 insert into review (creator_user_id, reviewed_film_id, content, is_positive) --2 (score: 4)
