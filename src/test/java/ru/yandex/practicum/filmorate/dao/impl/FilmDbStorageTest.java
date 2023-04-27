@@ -28,7 +28,7 @@ public class FilmDbStorageTest {
     private final FilmDbStorage filmDbStorage;
 
 
-    /*@Test
+    @Test
     public void testGetFilms() {
         Collection<Film> films = filmDbStorage.get();
         assertEquals(3, films.size());
@@ -141,13 +141,13 @@ public class FilmDbStorageTest {
 
         assertEquals(3, filmWithoutLike.getLikes().size());
         assertFalse(filmWithoutLike.getLikes().contains(1));
-    }*/
+    }
 
     @Test
     void getDirectorsOfFilm() {
         List<Film> films1 = (List<Film>) filmDbStorage.getFilmsByDirector(1, "year");
         films1.stream()
-                        .forEach(System.out::println);
+                .forEach(System.out::println);
         assertEquals(films1.size(), 1);
 
         List<Film> films2 = (List<Film>) filmDbStorage.getFilmsByDirector(2, "likes");

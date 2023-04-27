@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-@Component
+@Component("directorDbStorage")
 @Slf4j
 @RequiredArgsConstructor
 public class DirectorDbStorage implements DirectorStorage {
@@ -75,7 +75,7 @@ public class DirectorDbStorage implements DirectorStorage {
         String queryDirectorDelete = "DELETE FROM director " +
                 "WHERE director_id = ?;";
 
-        log.info("Удаление режиссера с id = {}", id);
+        log.info("Удаление режиссера с id = {}.", id);
         checkIfDirectorExists(id);
         jdbcTemplate.update(queryDirectorDelete, id);
     }
@@ -95,7 +95,7 @@ public class DirectorDbStorage implements DirectorStorage {
         try {
             jdbcTemplate.queryForObject(queryDirectorSelect, (rs, rowNum) -> makeDirector(rs), id);
         } catch (RuntimeException e) {
-            throw new DirectorNotFoundException("Режиссер с id = " + id + " отсутствует в БД");
+            throw new DirectorNotFoundException("Режиссер с id = " + id + " отсутствует в БД.");
         }
     }
 }

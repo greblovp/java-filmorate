@@ -43,13 +43,13 @@ public class ErrorHandler {
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleDirectorNotFound(final DirectorNotFoundException e) {
-        return new ErrorResponse("Режиссер не найден", e.getMessage());
+        return new ErrorResponse("Режиссер не найден.", e.getMessage());
     }
 
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidDirectorName(final DirectorValidationException e) {
-        return new ErrorResponse("Некорректное имя режиссера", e.getMessage());
+        return new ErrorResponse("Некорректное имя режиссера.", e.getMessage());
     }
 
     @ExceptionHandler()
