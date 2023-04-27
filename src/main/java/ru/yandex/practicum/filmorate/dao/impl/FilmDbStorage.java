@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.dao.DirectorStorage;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.GenreStorage;
 import ru.yandex.practicum.filmorate.dao.MPAStorage;
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -80,21 +81,27 @@ public class FilmDbStorage implements FilmStorage {
 
         int filmId = (int) keyHolder.getKey().longValue();
 
-        if (film.getGenres() == null) {
-            Film createdFilm = getById(filmId).orElse(null);
-            log.info("Фильм {} добавлен в базу данных", createdFilm);
-            return createdFilm;
+        if (film.getGenres() != null) {
+            String genreSqlQuery =
+                    "INSERT INTO film_x_genre (film_id, genre_id) " +
+                            "VALUES (?, ?)";
+
+            film.getGenres().forEach(genre -> {
+                jdbcTemplate.update(genreSqlQuery,
+                        filmId,
+                        genre.getId());
+            });
         }
 
-        String genreSqlQuery =
-                "INSERT INTO film_x_genre (film_id, genre_id) " +
-                        "VALUES (?, ?)";
+        if (film.getDirectors() != null) {
+            String queryDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
+                    "VALUES(?, ?);";
 
-        film.getGenres().forEach(genre -> {
-            jdbcTemplate.update(genreSqlQuery,
-                    filmId,
-                    genre.getId());
-        });
+            film.getDirectors().forEach(director ->
+            {
+                jdbcTemplate.update(queryDirectorInsert, filmId, director.getId());
+            });
+        }
 
         Film createdFilm = getById(filmId).orElse(null);
         log.info("Фильм {} добавлен в базу данных", createdFilm);
@@ -126,21 +133,31 @@ public class FilmDbStorage implements FilmStorage {
 
         jdbcTemplate.update(genreDeleteSqlQuery, film.getId());
 
-        if (film.getGenres() == null) {
-            Optional<Film> updatedFilm = this.getById(film.getId());
-            log.info("Фильм {} обновлен в базе данных", updatedFilm);
-            return updatedFilm;
+        if (film.getGenres() != null) {
+            String genreSqlQuery =
+                    "INSERT INTO film_x_genre (film_id, genre_id) " +
+                            "VALUES (?, ?)";
+
+            film.getGenres().forEach(genre -> {
+                jdbcTemplate.update(genreSqlQuery,
+                        film.getId(),
+                        genre.getId());
+            });
         }
 
-        String genreSqlQuery =
-                "INSERT INTO film_x_genre (film_id, genre_id) " +
-                        "VALUES (?, ?)";
+        String queryFilmDirectorDelete = "DELETE FROM film_x_director " +
+                "WHERE film_id = ?;";
 
-        film.getGenres().forEach(genre -> {
-            jdbcTemplate.update(genreSqlQuery,
-                    film.getId(),
-                    genre.getId());
-        });
+        jdbcTemplate.update(queryFilmDirectorDelete, film.getId());
+
+        if (film.getDirectors() != null) {
+            String queryFilmDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
+                    "VALUES(?, ?);";
+
+            film.getDirectors().forEach(director -> {
+                jdbcTemplate.update(queryFilmDirectorInsert, film.getId(), director.getId());
+            });
+        }
 
         Optional<Film> updatedFilm = this.getById(film.getId());
         log.info("Фильм {} обновлен в базе данных", updatedFilm);
@@ -166,6 +183,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getFilmsByDirector(int directorId, String sortType) {
+        directorStorage.checkIfDirectorExists(directorId);
         String queryFilmsSelect = "SELECT * " +
                 "FROM film AS f " +
                 "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +

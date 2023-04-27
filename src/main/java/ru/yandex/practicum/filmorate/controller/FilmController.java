@@ -69,10 +69,10 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
-    @GetMapping("director/{directorId}?sortBy={sortType}")
-    public Collection<Film> findFilmsByDirector(@RequestParam int directorId, @RequestParam String sortType) {
-        log.info("Вывести все фильмы режиссера {} с сортировкой по {}", directorId, sortType);
-        return filmService.getFilmsByDirector(directorId, sortType);
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> findFilmsByDirector(@PathVariable int directorId, @RequestParam String sortBy) {
+        log.info("Вывести все фильмы режиссера {} с сортировкой по {}", directorId, sortBy);
+        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 
     @DeleteMapping("/{filmId}")

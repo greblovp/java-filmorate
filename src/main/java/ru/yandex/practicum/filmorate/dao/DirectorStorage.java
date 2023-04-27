@@ -13,5 +13,7 @@ public interface DirectorStorage {
 
     Director udpate(Director director);
 
-    void delete(Director director);
+    void delete(int id);
+
+    void checkIfDirectorExists(int id);
 }
