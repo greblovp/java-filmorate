@@ -84,7 +84,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public void removeUser (int userId) {
+    public void removeUser(int userId) {
         User user = checkUserId(userId);
 
         userStorage.removeUser(userId);
