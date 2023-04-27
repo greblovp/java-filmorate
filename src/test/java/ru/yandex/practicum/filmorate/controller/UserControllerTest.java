@@ -9,6 +9,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.ActionType;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.*;
 
@@ -198,6 +201,7 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         verify(userService).addFriend(userId1, userId2);
+        verify(eventService, times(1)).createEvent(userId1, EventType.FRIEND, ActionType.ADD, userId2);
     }
 
     @Test
@@ -208,6 +212,39 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         verify(userService).removeFriend(userId1, userId2);
+        verify(eventService, times(1)).createEvent(userId1, EventType.FRIEND, ActionType.REMOVE, userId2);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testGetEventsWithInvalidUserId() {
+        // Arrange
+        int invalidUserId = 100;
+
+        when(userService.findById(invalidUserId)).thenThrow(new UserNotFoundException(String.format("Пользователь с ID = %d не найден.", invalidUserId)));
+
+        mockMvc.perform(get("/users/" + invalidUserId + "/feed"))
+                .andExpect(status().isNotFound());
+
+        verify(userService).findById(invalidUserId);
+        verifyNoInteractions(eventService);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testGetEventsWithValidUserId() {
+        // Arrange
+        int userId = 1;
+
+        when(userService.findById(userId)).thenReturn(null);
+        when(eventService.findByUserId(userId)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/users/" + userId + "/feed"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(userService).findById(userId);
+        verify(eventService).findByUserId(userId);
     }
 
 }
