@@ -36,15 +36,15 @@ public class FilmController {
 
     @GetMapping("/popular")
     public Collection<Film> getPopular(@RequestParam(defaultValue = "10") int count,
-                                       @RequestParam(required = false) String genreId,
-                                       @RequestParam(required = false) String year) {
-        if (genreId == null && year == null) {
-            log.info("Вывести ТОП {} фильмов", count);
+                                       @RequestParam(defaultValue = "0") String genreId,
+                                       @RequestParam(defaultValue = "0") String year) {
+        log.info("Вывести ТОП {} фильмов, жанр: {}, год: {}", count, genreId, year);
+        if ("0".equals(genreId) && "0".equals(year)) {
             return filmService.getTop(count);
         }
         log.info("Получаем список из {} популярных фильмов", count);
-        return filmService.getPopularFilmsByGenreAndYear(count, genreId == null?0:Integer.parseInt(genreId),
-                year==null?0:Integer.parseInt(year));
+        return filmService.getPopularFilmsByGenreAndYear(count, genreId == null ? 0 : Integer.parseInt(genreId),
+                year == null ? 0 : Integer.parseInt(year));
     }
 
     @PutMapping("/{filmId}/like/{userId}")
