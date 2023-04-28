@@ -51,7 +51,7 @@ class EventDbStorageTest {
     public void testGetEventByUserId() {
         Collection<Event> events = eventDbStorage.getByUserId(1);
 
-        assertEquals(events.size(), 2);
+        assertEquals(2, events.size());
     }
 
 
