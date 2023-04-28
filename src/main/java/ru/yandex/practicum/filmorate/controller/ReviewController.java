@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.MinReviewValidationException;
 import ru.yandex.practicum.filmorate.exception.NotNullReviewValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
@@ -78,7 +77,7 @@ public class ReviewController {
     }
 
     private void generateCustomValidateException(Review review, BindingResult bindingResult)
-            throws NotNullReviewValidationException, MinReviewValidationException {
+            throws NotNullReviewValidationException {
         if (bindingResult.hasErrors()) {
             FieldError fieldError = bindingResult.getFieldError();
             String fieldName = fieldError.getField();
@@ -87,8 +86,6 @@ public class ReviewController {
 
             if (defaultMessage.equals("review notnull")) {
                 throw new NotNullReviewValidationException("Поле '" + fieldName + "' не должно быть пустым");
-            } else if (defaultMessage.equals("review min1")) {
-                throw new MinReviewValidationException("Поле '" + fieldName + "' должно быть больше или равно 1");
             }
         }
     }

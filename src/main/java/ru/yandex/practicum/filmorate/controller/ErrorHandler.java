@@ -40,12 +40,6 @@ public class ErrorHandler {
         return new ErrorResponse("Отзыв не найден", e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleMinReviewValidationException(final MinReviewValidationException e) {
-        return new ErrorResponse("Ошибка в заполнении полей отзыва", e.getMessage());
-    }
-
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidEmail(final FilmValidationException e) {

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 
@@ -21,10 +20,8 @@ public class Review {
     @JsonProperty("isPositive")
     private Boolean isPositive;  //тип отзыва
     @NotNull(message = "review notnull")
-    @Min(value = 1, message = "review min1")
     private Integer userId;  //идентификатор пользователя, оставившего отзыв
     @NotNull(message = "review notnull")
-    @Min(value = 1, message = "review min1")
     private Integer filmId;  //идентификатор фильма, к которому создается отзыв
     private int useful;  //рейтинг полезности отзыва
 }
