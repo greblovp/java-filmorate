@@ -18,4 +18,6 @@ public interface UserStorage {
     public void addFriend(User user, User friend);
 
     public void removeFriend(User user, User friend);
+
+    public void removeUser(int userId);
 }

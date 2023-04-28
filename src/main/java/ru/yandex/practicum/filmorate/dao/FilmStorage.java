@@ -22,4 +22,6 @@ public interface FilmStorage {
     public Collection<Film> getPopularByGenreAndYear(int count, int genreId, int year);
 
     Collection<Film> getFilmsByDirector(int directorId, String sortType);
+
+    public void removeFilm(int filmId);
 }

@@ -213,6 +213,25 @@ class FilmServiceTest {
     }
 
     @Test
+    public void testRemoveFilm() {
+        when(filmStorage.getById(filmId)).thenReturn(Optional.of(film));
+
+        filmService.removeFilm(filmId);
+
+        verify(filmStorage).getById(filmId);
+        verify(filmStorage).removeFilm(filmId);
+    }
+
+    @Test
+    public void testRemoveFilmWhenFilmIsNull() {
+        when(filmStorage.getById(filmId)).thenReturn(Optional.empty());
+
+        FilmNotFoundException exception = assertThrows(FilmNotFoundException.class, () -> filmService.removeFilm(filmId));
+        verify(filmStorage).getById(filmId);
+        assertEquals(exception.getMessage(), "Фильм с ID = " + filmId + " не найден.");
+    }
+
+    @Test
     public void testPopularByGenreAndYear() {
         when(filmStorage.getPopularByGenreAndYear(10, 0, 2010)).thenReturn(List.of(popularFilm));
 

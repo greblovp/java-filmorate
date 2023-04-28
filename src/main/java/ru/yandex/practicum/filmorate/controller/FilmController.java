@@ -76,6 +76,12 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
+    @DeleteMapping("/{filmId}")
+    public void removeFilm(@PathVariable int filmId) {
+        log.info("Удаляем фильм: {}", filmId);
+        filmService.removeFilm(filmId);
+    }
+
     @GetMapping("/director/{directorId}")
     public Collection<Film> findFilmsByDirector(@PathVariable int directorId, @RequestParam String sortBy) {
         log.info("Вывести все фильмы режиссера {} с сортировкой по {}.", directorId, sortBy);

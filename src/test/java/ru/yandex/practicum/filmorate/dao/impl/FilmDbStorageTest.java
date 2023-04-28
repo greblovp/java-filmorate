@@ -9,7 +9,10 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
 
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -175,6 +178,16 @@ public class FilmDbStorageTest {
         Collection<Film> films = filmDbStorage.getPopularByGenreAndYear(10, 0, 2021);
         assertEquals(1, films.size());
         assertEquals(2, ((List<Film>)films).get(0).getId());
+    }
+
+    @Test
+    public void testRemoveFilm() {
+        Film film = filmDbStorage.getById(1).orElse(null);
+        assertNotNull(film);
+
+        filmDbStorage.removeFilm(1);
+        film = filmDbStorage.getById(1).orElse(null);
+        assertNull(film);
     }
 }
 

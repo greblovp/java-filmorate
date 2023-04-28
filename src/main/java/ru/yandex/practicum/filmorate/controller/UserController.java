@@ -74,6 +74,11 @@ public class UserController {
         return userService.updateUser(user);
     }
 
+    @DeleteMapping("/{userId}")
+    public void removeUser(@PathVariable int userId) {
+        userService.removeUser(userId);
+    }
+
     private void generateCustomValidateException(User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.warn("Ошибка в заполнении поля {} - {}. Пользователь - {}", bindingResult.getFieldError().getField(),
