@@ -174,25 +174,4 @@ class FilmControllerTest {
                 .andExpect(status().isOk());
         verify(filmService, times(1)).removeFilm(filmId);
     }
-
-    @Test
-    @SneakyThrows
-    public void testRemoveFilm() {
-        int filmId = 1;
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/films/" + filmId))
-                .andExpect(status().isOk());
-        verify(filmService, times(1)).removeFilm(filmId);
-    }
-
-    @Test
-    @SneakyThrows
-    public void testRemoveFilm() {
-        int filmId = 1;
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/films/" + filmId))
-                .andExpect(status().isOk());
-        verify(filmService, times(1)).removeFilm(filmId);
-    }
-
 }
