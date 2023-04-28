@@ -181,38 +181,3 @@ public class UserDbStorage implements UserStorage {
         return new HashSet<>(friends);
     }
 }
-
-/*    @Override
-    public Collection<Film> getFilmRecommendations(int userId) {
-        // Поиск пользователя с максимальным количеством пересечений лайков
-        String sqlQuery1 = "SELECT user_id " +
-                "FROM film_like " +
-                "WHERE user_id != ? AND film_id IN (SELECT film_id FROM film_like WHERE user_id = ?) " +
-                "GROUP BY user_id " +
-                "ORDER BY COUNT(film_id) DESC " +
-                "LIMIT 1";
-        Integer userIdForFilmRecommend;
-        try {
-            userIdForFilmRecommend =
-                    jdbcTemplate.queryForObject(sqlQuery1, Integer.class, userId, userId);
-        } catch (EmptyResultDataAccessException e) {
-            return Collections.emptyList();
-        }
-        // Поиск уникальных лайков у userIdForFilmRecommend по отношению к userId
-        String sqlQuery2 = "SELECT film_id " +
-                "FROM film_like " +
-                "WHERE user_id = ? AND film_id NOT IN (SELECT film_id FROM film_like WHERE user_id = ?)";
-        // Возвращаем рекомендованные фильмы по id уникальных лайков
-        List<Film> recommendedFilms;
-        try {
-            recommendedFilms = jdbcTemplate.queryForList(sqlQuery2, Integer.class, userIdForFilmRecommend, userId)
-                    .stream()
-                    .map(filmStorage::getById)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toList());
-        } catch (EmptyResultDataAccessException e) {
-            return Collections.emptyList();
-        }
-        return recommendedFilms;
-    }*/
