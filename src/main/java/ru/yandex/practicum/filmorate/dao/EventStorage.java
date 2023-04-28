@@ -13,5 +13,5 @@ public interface EventStorage {
 
     public Collection<Event> getByUserId(int userId);
 
-    public Event create(int userId, EventType eventType, ActionType actionType, int entityId);
+    public Event create(int userId, EventType eventType, ActionType actionType, long entityId);
 }

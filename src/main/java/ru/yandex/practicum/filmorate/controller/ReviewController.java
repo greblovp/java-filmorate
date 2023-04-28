@@ -6,7 +6,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotNullReviewValidationException;
+import ru.yandex.practicum.filmorate.model.ActionType;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.validation.Valid;
@@ -19,6 +22,7 @@ import java.util.Collection;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final EventService eventService;
 
     @GetMapping("/{id}")
     public Review getReviewById(@PathVariable long id) {
@@ -36,14 +40,20 @@ public class ReviewController {
     public Review createReview(@RequestBody @Valid Review review, BindingResult bindingResult) {
         log.info("Создать отзыв: {}", review);
         generateCustomValidateException(review, bindingResult);
-        return reviewService.createReview(review);
+        Review createdReview = reviewService.createReview(review);
+        eventService.createEvent(createdReview.getUserId(), EventType.REVIEW, ActionType.ADD,
+                createdReview.getReviewId());
+        return createdReview;
     }
 
     @PutMapping
     public Review updateReview(@RequestBody @Valid Review review, BindingResult bindingResult) {
         log.info("Обновить отзыв: {}", review);
         generateCustomValidateException(review, bindingResult);
-        return reviewService.updateReview(review);
+        Review updatedReview = reviewService.updateReview(review);
+        eventService.createEvent(updatedReview.getUserId(), EventType.REVIEW, ActionType.UPDATE,
+                updatedReview.getReviewId());
+        return updatedReview;
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -61,7 +71,10 @@ public class ReviewController {
     @DeleteMapping("/{id}")
     public void removeReview(@PathVariable long id) {
         log.info("Удалить отзыв с ID: {}", id);
+        Review reviewToRemove = reviewService.findById(id);
         reviewService.removeReview(id);
+        eventService.createEvent(reviewToRemove.getUserId(), EventType.REVIEW, ActionType.REMOVE,
+                reviewToRemove.getReviewId());
     }
 
     @DeleteMapping("/{id}/like/{userId}")

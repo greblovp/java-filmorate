@@ -52,7 +52,7 @@ public class EventDbStorage implements EventStorage {
     }
 
     @Override
-    public Event create(int userId, EventType eventType, ActionType actionType, int entityId) {
+    public Event create(int userId, EventType eventType, ActionType actionType, long entityId) {
         String userSqlQuery =
                 "INSERT INTO event (user_id, event_type, action_type, entity_id, event_dttm) " +
                 "VALUES (?, ?, ?, ?, ?)";
@@ -63,7 +63,7 @@ public class EventDbStorage implements EventStorage {
             stmt.setInt(1, userId);
             stmt.setString(2, String.valueOf(eventType));
             stmt.setString(3, String.valueOf(actionType));
-            stmt.setInt(4, entityId);
+            stmt.setLong(4, entityId);
             stmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
             return stmt;
         }, keyHolder);
@@ -87,8 +87,8 @@ public class EventDbStorage implements EventStorage {
                 .userId(rs.getInt("user_id"))
                 .eventType(EventType.valueOf(rs.getString("event_type")))
                 .actionType(ActionType.valueOf(rs.getString("action_type")))
-                .entityId(rs.getInt("entity_id"))
-                .eventDateTime(rs.getTimestamp("event_dttm").toLocalDateTime())
+                .entityId(rs.getLong("entity_id"))
+                .eventDateTime(rs.getTimestamp("event_dttm").toInstant().toEpochMilli())
                 .build();
         return event;
     }
