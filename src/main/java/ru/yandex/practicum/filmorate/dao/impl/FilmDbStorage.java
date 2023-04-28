@@ -222,7 +222,7 @@ public class FilmDbStorage implements FilmStorage {
                     "LIMIT ?";
             films = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), year, count);
 
-        } else if(year == 0) {
+        } else if (year == 0) {
             sqlQuery = "SELECT f.film_id, f.name, f.description, f.release_dt, f.duration, f.rating_id, " +
                     "COUNT(fl.user_id) as likes " +
                     "FROM film f " +

@@ -43,8 +43,8 @@ public class FilmController {
             return filmService.getTop(count);
         }
         log.info("Получаем список из {} популярных фильмов", count);
-        return filmService.getPopularFilmsByGenreAndYear(count, genreId == null?0:Integer.parseInt(genreId),
-                year==null?0:Integer.parseInt(year));
+        return filmService.getPopularFilmsByGenreAndYear(count, genreId == null ? 0 : Integer.parseInt(genreId),
+                year == null ? 0 : Integer.parseInt(year));
     }
 
     @PutMapping("/{filmId}/like/{userId}")
