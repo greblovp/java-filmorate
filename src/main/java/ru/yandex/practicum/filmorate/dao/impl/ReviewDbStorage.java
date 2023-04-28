@@ -27,14 +27,14 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Review getById(long reviewId) {
         String sqlQuery = "SELECT r.review_id AS reviewId,\n" +
-                "\t   r.content AS content,\n" +
-                "\t   r.is_positive AS isPositive,\n" +
-                "\t   r.creator_user_id AS userId,\n" +
-                "\t   r.reviewed_film_id AS filmId,\n" +
-                "\t   COALESCE(SUM(rl.score), 0) AS useful\n" +
-                "FROM review AS r LEFT JOIN review_like AS rl ON r.review_id = rl.review_id   \n" +
-                "WHERE r.review_id = ? \n" +
-                "GROUP BY r.review_id;";
+                "\t\tr.content AS content,\n" +
+                "\t\tr.is_positive AS isPositive,\n" +
+                "\t\tr.creator_user_id AS userId,\n" +
+                "\t\tr.reviewed_film_id AS filmId,\n" +
+                "\t\tCOALESCE(SUM(rl.score), 0) AS useful\n" +
+                "FROM review AS r LEFT JOIN review_like AS rl ON r.review_id = rl.review_id\n" +
+                "WHERE r.review_id = ?\n" +
+                "GROUP BY r.review_id, r.content, r.is_positive, r.creator_user_id, r.reviewed_film_id;";
 
         final List<Review> reviews = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeReview(rs), reviewId);
         if (reviews.size() != 1) {
@@ -48,15 +48,15 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Collection<Review> getReviewsByFilmId(int filmId, int count) {
         String sqlQuery = "SELECT r.review_id AS reviewId,\n" +
-                "\t   r.content AS content,\n" +
-                "\t   r.is_positive AS isPositive,\n" +
-                "\t   r.creator_user_id AS userId,\n" +
-                "\t   r.reviewed_film_id AS filmId,\n" +
-                "\t   COALESCE(SUM(rl.score), 0) AS useful\n" +
+                "\t\tr.content AS content,\n" +
+                "\t\tr.is_positive AS isPositive,\n" +
+                "\t\tr.creator_user_id AS userId,\n" +
+                "\t\tr.reviewed_film_id AS filmId,\n" +
+                "\t\tCOALESCE(SUM(rl.score), 0) AS useful\n" +
                 "FROM review AS r LEFT JOIN review_like AS rl ON r.review_id = rl.review_id\n" +
                 "WHERE r.reviewed_film_id = ?\n" +
-                "GROUP BY r.review_id\n" +
-                "ORDER BY useful DESC\n" +
+                "GROUP BY r.review_id, r.content, r.is_positive, r.creator_user_id, r.reviewed_film_id\n" +
+                "ORDER BY useful DESC, reviewId\n" +
                 "LIMIT ?;";
 
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeReview(rs), filmId, count);
@@ -65,14 +65,14 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Collection<Review> getReviewsByAllFilms(int count) {
         String sqlQuery = "SELECT r.review_id AS reviewId,\n" +
-                "\t   r.content AS content,\n" +
-                "\t   r.is_positive AS isPositive,\n" +
-                "\t   r.creator_user_id AS userId,\n" +
-                "\t   r.reviewed_film_id AS filmId,\n" +
-                "\t   COALESCE(SUM(rl.score), 0) AS useful\n" +
+                "\t\tr.content AS content,\n" +
+                "\t\tr.is_positive AS isPositive,\n" +
+                "\t\tr.creator_user_id AS userId,\n" +
+                "\t\tr.reviewed_film_id AS filmId,\n" +
+                "\t\tCOALESCE(SUM(rl.score), 0) AS useful\n" +
                 "FROM review AS r LEFT JOIN review_like AS rl ON r.review_id = rl.review_id\n" +
-                "GROUP BY r.review_id\n" +
-                "ORDER BY useful DESC\n" +
+                "GROUP BY r.review_id, r.content, r.is_positive, r.creator_user_id, r.reviewed_film_id\n" +
+                "ORDER BY 6 DESC, 1\n" +
                 "LIMIT ?;";
 
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeReview(rs), count);
@@ -137,6 +137,4 @@ public class ReviewDbStorage implements ReviewStorage {
 
         return new Review(reviewId, content, isPositive, userId, filmId, useful);
     }
-
-
 }

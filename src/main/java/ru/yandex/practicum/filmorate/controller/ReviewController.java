@@ -2,7 +2,11 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.MinReviewValidationException;
+import ru.yandex.practicum.filmorate.exception.NotNullReviewValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
@@ -30,19 +34,21 @@ public class ReviewController {
     }
 
     @PostMapping
-    public Review createReview(@RequestBody @Valid Review review) {
+    public Review createReview(@RequestBody @Valid Review review, BindingResult bindingResult) {
         log.info("Создать отзыв: {}", review);
+        generateCustomValidateException(review, bindingResult);
         return reviewService.createReview(review);
     }
 
     @PutMapping
-    public Review updateReview(@RequestBody @Valid Review review) {
+    public Review updateReview(@RequestBody @Valid Review review, BindingResult bindingResult) {
         log.info("Обновить отзыв: {}", review);
+        generateCustomValidateException(review, bindingResult);
         return reviewService.updateReview(review);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void likeReview(@PathVariable int id, @PathVariable int userId) {
+    public void likeReview(@PathVariable long id, @PathVariable int userId) {
         log.info("User с ID = {} ставит лайк отзыву с ID = {}", userId, id);
         reviewService.likeReview(id, userId, true);
     }
@@ -69,5 +75,21 @@ public class ReviewController {
     public void removeDislike(@PathVariable long id, @PathVariable int userId) {
         log.info("User с ID = {} удаляет дизлайк к отзыву с ID = {}", userId, id);
         reviewService.removeLike(id, userId, false);
+    }
+
+    private void generateCustomValidateException(Review review, BindingResult bindingResult)
+            throws NotNullReviewValidationException, MinReviewValidationException {
+        if (bindingResult.hasErrors()) {
+            FieldError fieldError = bindingResult.getFieldError();
+            String fieldName = fieldError.getField();
+            String defaultMessage = fieldError.getDefaultMessage();
+            log.error("Ошибка в заполнении поля {} - {}. Отзыв - {}", fieldName, defaultMessage, review);
+
+            if (defaultMessage.equals("review notnull")) {
+                throw new NotNullReviewValidationException("Поле '" + fieldName + "' не должно быть пустым");
+            } else if (defaultMessage.equals("review min1")) {
+                throw new MinReviewValidationException("Поле '" + fieldName + "' должно быть больше или равно 1");
+            }
+        }
     }
 }

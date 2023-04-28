@@ -6,7 +6,6 @@ import java.util.Collection;
 
 public interface ReviewStorage {
 
-
     Review getById(long reviewId);
 
     Collection<Review> getReviewsByFilmId(int filmId, int count);

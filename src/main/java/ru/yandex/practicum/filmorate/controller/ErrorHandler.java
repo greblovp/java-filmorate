@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,6 +40,12 @@ public class ErrorHandler {
         return new ErrorResponse("Отзыв не найден", e.getMessage());
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleMinReviewValidationException(final MinReviewValidationException e) {
+        return new ErrorResponse("Ошибка в заполнении полей отзыва", e.getMessage());
+    }
+
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidEmail(final FilmValidationException e) {
@@ -53,15 +58,15 @@ public class ErrorHandler {
         return new ErrorResponse("Ошибка в заполнении полей пользователя", e.getMessage());
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNotNullReviewValidationException(final NotNullReviewValidationException e) {
+        return new ErrorResponse("Ошибка в заполнении полей отзыва", e.getMessage());
+    }
+
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleError(final Throwable e) {
         return new ErrorResponse("Произошла непредвиденная ошибка.", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
-        return new ErrorResponse("Ошибка валидации", e.getMessage());
     }
 }

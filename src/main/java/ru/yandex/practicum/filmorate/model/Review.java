@@ -2,23 +2,29 @@ package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 
 @Data
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class Review {
 
     private long reviewId;  //идентификатор отзыва
-    @NonNull
+    @NotNull(message = "review notnull")
     private String content;  //содержание отзыва
-    @NonNull
+    @NotNull(message = "review notnull")
     @JsonProperty("isPositive")
     private Boolean isPositive;  //тип отзыва
-    @NonNull
+    @NotNull(message = "review notnull")
+    @Min(value = 1, message = "review min1")
     private Integer userId;  //идентификатор пользователя, оставившего отзыв
-    @NonNull
+    @NotNull(message = "review notnull")
+    @Min(value = 1, message = "review min1")
     private Integer filmId;  //идентификатор фильма, к которому создается отзыв
     private int useful;  //рейтинг полезности отзыва
 }

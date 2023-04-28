@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.ReviewStorage;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
@@ -20,6 +18,8 @@ public class ReviewService {
     @Qualifier("reviewDbStorage")
     @NonNull
     private final ReviewStorage reviewStorage;
+    private final FilmService filmService;
+    private final UserService userService;
 
 
     public Review findById(long reviewId) {
@@ -34,14 +34,8 @@ public class ReviewService {
     }
 
     public Review createReview(Review review) {
-        if (review.getFilmId() < 1) {
-            log.error("ID фильма не может быть отрицательным. ID = {}", review.getFilmId());
-            throw new FilmNotFoundException("ID фильма не может быть отрицательным. ID = " + review.getFilmId());
-        }
-        if (review.getUserId() < 1) {
-            log.error("ID пользователя не может быть отрицательным. ID = {}", review.getUserId());
-            throw new UserNotFoundException("ID пользователя не может быть отрицательным. ID = " + review.getUserId());
-        }
+        userService.findById(review.getUserId());
+        filmService.findById(review.getFilmId());
         return reviewStorage.createReview(review);
     }
 
@@ -51,6 +45,7 @@ public class ReviewService {
     }
 
     public void likeReview(long reviewId, int userId, boolean like) {
+        userService.findById(userId);
         if (like) {
             reviewStorage.likeReview(reviewId, userId, 1);
         } else {
