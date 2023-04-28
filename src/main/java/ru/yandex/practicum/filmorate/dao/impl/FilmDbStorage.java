@@ -199,5 +199,4 @@ public class FilmDbStorage implements FilmStorage {
         List<Integer> likes = jdbcTemplate.queryForList(sqlQuery, Integer.class, filmId);
         return new HashSet<>(likes);
     }
-
 }

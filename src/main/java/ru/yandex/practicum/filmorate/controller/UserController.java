@@ -6,11 +6,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.UserValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 @Slf4j
@@ -72,6 +74,12 @@ public class UserController {
         generateCustomValidateException(user, bindingResult);
         validateService.validateUser(user);
         return userService.updateUser(user);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public Collection<Film> getFilmRecommendations(@NotNull @PathVariable int userId) {
+        log.info("Получить список рекомендованных фильмов для пользователя с ID = {}", userId);
+        return userService.getFilmRecommendations(userId);
     }
 
     private void generateCustomValidateException(User user, BindingResult bindingResult) {

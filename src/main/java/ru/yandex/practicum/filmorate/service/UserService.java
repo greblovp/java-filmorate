@@ -4,12 +4,15 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -82,6 +85,16 @@ public class UserService {
         return commonFriendIds.stream()
                 .map(this::checkUserId)
                 .collect(Collectors.toList());
+    }
+
+    public Collection<Film> getFilmRecommendations(int userId) {
+        checkUserId(userId);
+        try {
+            return userStorage.getFilmRecommendations(userId);
+        } catch (EmptyResultDataAccessException e) {
+            log.info("Рекомедации по фильмам для пользователя с ID = {} отсутствуют", userId);
+            return Collections.emptyList();
+        }
     }
 
     private User checkUserId(int id) {
