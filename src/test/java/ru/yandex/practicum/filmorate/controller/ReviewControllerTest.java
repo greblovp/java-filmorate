@@ -34,13 +34,13 @@ class ReviewControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    final private Review failReview = Review.builder()
+    public Review failReview = Review.builder()
             .userId(2)
             .filmId(1)
             .isPositive(true)
             .build();
 
-    final private Review review = Review.builder()
+    public Review review = Review.builder()
             .userId(2)
             .filmId(1)
             .content("Отличное кино")
