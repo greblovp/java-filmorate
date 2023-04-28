@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 @Slf4j
@@ -77,7 +76,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/recommendations")
-    public Collection<Film> getFilmRecommendations(@NotNull @PathVariable int userId) {
+    public Collection<Film> getFilmRecommendations(@PathVariable int userId) {
         log.info("Получить список рекомендованных фильмов для пользователя с ID = {}", userId);
         return userService.getFilmRecommendations(userId);
     }

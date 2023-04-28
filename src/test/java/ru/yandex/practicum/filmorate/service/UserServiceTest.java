@@ -3,9 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -198,7 +198,6 @@ class UserServiceTest {
 
         assertThrows(UserNotFoundException.class, () -> userService.updateUser(user));
     }
-
 
     @Test
     public void testGetFriends() {

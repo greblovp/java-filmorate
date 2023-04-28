@@ -208,4 +208,17 @@ class UserControllerTest {
         verify(userService).removeFriend(userId1, userId2);
     }
 
+    @Test
+    public void testGetFilmRecommendations() throws Exception {
+        int userId = 1;
+        mockMvc.perform(get("/users/" + userId + "/recommendations"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetFilmRecommendationsWithNotExistedId() throws Exception {
+        int userId = 123;
+        mockMvc.perform(get("/users" + userId + "/recommendations"))
+                .andExpect(status().isNotFound());
+    }
 }

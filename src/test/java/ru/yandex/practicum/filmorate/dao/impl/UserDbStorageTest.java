@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserDbStorageTest {
 
     private final UserDbStorage userDbStorage;
+    private final FilmDbStorage filmDbStorage;
 
 
     @Test
@@ -129,4 +131,13 @@ class UserDbStorageTest {
         assertFalse(userWithOutFriend.getFriends().contains(3));
     }
 
+    @Test
+    public void testGetFilmRecommendations() {
+        Film expectedFilm = filmDbStorage.getById(2).get();
+        Collection<Film> films = userDbStorage.getFilmRecommendations(3);
+        Film actualFilm = films.iterator().next();
+
+        assertEquals(1, films.size());
+        assertEquals(expectedFilm, actualFilm);
+    }
 }
