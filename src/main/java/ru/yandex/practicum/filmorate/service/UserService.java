@@ -96,6 +96,14 @@ public class UserService {
             return Collections.emptyList();
         }
     }
+  
+    public void removeUser(int userId) {
+        User user = checkUserId(userId);
+
+        userStorage.removeUser(userId);
+
+        log.debug("Удален пользователь {}", user);
+    }
 
     private User checkUserId(int id) {
         return userStorage.getById(id).orElseThrow(()

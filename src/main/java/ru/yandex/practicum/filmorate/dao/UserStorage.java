@@ -21,4 +21,6 @@ public interface UserStorage {
     public void removeFriend(User user, User friend);
 
     public Collection<Film> getFilmRecommendations(int userId);
+
+    public void removeUser(int userId);
 }

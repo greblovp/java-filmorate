@@ -79,6 +79,10 @@ public class UserController {
     public Collection<Film> getFilmRecommendations(@PathVariable int userId) {
         log.info("Получить список рекомендованных фильмов для пользователя с ID = {}", userId);
         return userService.getFilmRecommendations(userId);
+
+    @DeleteMapping("/{userId}")
+    public void removeUser(@PathVariable int userId) {
+        userService.removeUser(userId);
     }
 
     private void generateCustomValidateException(User user, BindingResult bindingResult) {

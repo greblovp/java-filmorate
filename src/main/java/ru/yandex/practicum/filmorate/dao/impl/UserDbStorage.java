@@ -122,6 +122,7 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sqlQuery, user.getId(), friend.getId());
     }
 
+
     @Override
     public Collection<Film> getFilmRecommendations(int userId) throws EmptyResultDataAccessException {
         // Запрос пользователя с максимальным количеством пересечений лайков
@@ -157,6 +158,14 @@ public class UserDbStorage implements UserStorage {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public void removeUser(int userId) {
+        String sqlQuery =
+                "DELETE FROM \"user\" " +
+                        "WHERE user_id = ?";
+        jdbcTemplate.update(sqlQuery, userId);
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
