@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -20,4 +21,6 @@ public interface FilmStorage {
     public void removeLike(Film film, User user);
 
     public void removeFilm(int filmId);
+
+    public Collection<Film> getCommonFilms(int userId, int friendId);
 }

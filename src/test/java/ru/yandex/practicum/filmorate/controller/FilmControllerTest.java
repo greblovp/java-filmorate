@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.*;
 
@@ -169,4 +170,30 @@ class FilmControllerTest {
         verify(filmService, times(1)).removeFilm(filmId);
     }
 
+    @Test
+    @SneakyThrows
+    public void testGetCommonFilms() {
+        int userId = 1;
+        int friendId = 2;
+        when(filmService.getCommonFilms(userId, friendId)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/common?userId=" + userId + "&friendId=" + friendId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+        verify(filmService, times(1)).getCommonFilms(userId, friendId);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testGetCommonFilmsForNotExistedUser() {
+        int userId = 123;
+        int friendId = 2;
+        when(filmService.getCommonFilms(userId, friendId))
+                .thenThrow(new UserNotFoundException(String.format("Пользователь с ID = %d не найден.", userId)));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/common?userId=" + userId + "&friendId=" + friendId))
+                .andExpect(status().isNotFound());
+    }
 }

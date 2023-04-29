@@ -75,6 +75,12 @@ public class FilmController {
         filmService.removeFilm(filmId);
     }
 
+    @GetMapping("/common")
+    public Collection<Film> getCommonFilms(@RequestParam int userId,
+                                           @RequestParam int friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
     private void generateCustomValidateException(Film film, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.warn("Ошибка в заполнении поля {} - {}. Фильм - {}", bindingResult.getFieldError().getField(),

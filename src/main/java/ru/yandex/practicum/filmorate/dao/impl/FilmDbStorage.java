@@ -162,12 +162,34 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, film.getId(), user.getId());
     }
 
+    @Override
     public void removeFilm(int filmId) {
         String sqlQuery =
                 "DELETE FROM film " +
                         "WHERE film_id = ?";
 
         jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        String sqlQuery =
+                "SELECT film_id " +
+                        "FROM film_like " +
+                        "WHERE user_id = ? " +
+                        "INTERSECT " +
+                        "SELECT film_id " +
+                        "FROM film_like " +
+                        "WHERE user_id = ?";
+        return jdbcTemplate.queryForList(sqlQuery,
+                        Integer.class,
+                        userId,
+                        friendId)
+                .stream()
+                .map(this::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
