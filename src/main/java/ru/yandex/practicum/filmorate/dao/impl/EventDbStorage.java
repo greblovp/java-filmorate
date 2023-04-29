@@ -7,9 +7,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.EventStorage;
-import ru.yandex.practicum.filmorate.model.ActionType;
+import ru.yandex.practicum.filmorate.enums.ActionType;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.enums.EventType;
 
 import java.sql.*;
 import java.sql.Timestamp;

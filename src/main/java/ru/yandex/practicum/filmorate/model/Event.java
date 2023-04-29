@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.enums.ActionType;
+import ru.yandex.practicum.filmorate.enums.EventType;
 
 @Data
 @Builder
