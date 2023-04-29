@@ -26,5 +26,6 @@ public class InMemoryUserStorage extends BaseModelStorage<User> implements UserS
     }
 
     @Deprecated
-    public void removeUser(int userId) {}
+    public void removeUser(int userId) {
+    }
 }
