@@ -24,4 +24,8 @@ public class InMemoryUserStorage extends BaseModelStorage<User> implements UserS
     public Collection<Film> getFilmRecommendations(int userId) {
         return Collections.emptyList();
     }
+
+    @Deprecated
+    public void removeUser(int userId) {
+    }
 }

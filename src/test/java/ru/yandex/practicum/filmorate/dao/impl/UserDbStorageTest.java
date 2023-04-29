@@ -140,4 +140,14 @@ class UserDbStorageTest {
         assertEquals(1, films.size());
         assertEquals(expectedFilm, actualFilm);
     }
+    @Test
+    public void testRemoveUser() {
+        User user = userDbStorage.getById(1).orElse(null);
+        assertNotNull(user);
+
+        userDbStorage.removeUser(1);
+        user = userDbStorage.getById(1).orElse(null);
+        assertNull(user);
+    }
+
 }
