@@ -30,7 +30,7 @@ public class ValidateService {
     }
 
     public void validateDirector(Director director) {
-        if (director.getName().isBlank() || director.getName() == null) {
+        if (director.getName() == null || director.getName().isBlank()) {
             throw new DirectorValidationException("Имя режиссера не может быть пустым.");
         }
     }

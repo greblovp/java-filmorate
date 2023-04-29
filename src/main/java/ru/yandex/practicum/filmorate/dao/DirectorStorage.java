@@ -15,5 +15,6 @@ public interface DirectorStorage {
 
     void delete(int id);
 
+    // Метод, применяемый в DAO классов Director и Film
     void checkIfDirectorExists(int id);
 }

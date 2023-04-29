@@ -1,14 +1,14 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
-
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
@@ -48,6 +48,8 @@ public class FilmDbStorageTest {
         assertEquals(1, film.getMpa().getId());
         assertEquals("G", film.getMpa().getName());
         assertEquals(1, film.getGenres().size());
+        assertEquals(1, film.getDirectors().size());
+
     }
 
     @Test
@@ -64,6 +66,9 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2022, 01, 01))
                 .mpa(new MPA(1, "G"))
                 .genres(new HashSet<>(Arrays.asList(new Genre(1, "Комедия"), new Genre(2, "Драма"))))
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Режиссер1"),
+                        new Director(2, "Режиссер2"))))
                 .build();
         Film createdFilm = filmDbStorage.create(film);
         assertNotNull(createdFilm);
@@ -72,6 +77,7 @@ public class FilmDbStorageTest {
         assertEquals(film.getMpa().getId(), createdFilm.getMpa().getId());
         assertEquals(film.getMpa().getName(), createdFilm.getMpa().getName());
         assertEquals(film.getGenres().size(), createdFilm.getGenres().size());
+        assertEquals(film.getDirectors().size(), createdFilm.getDirectors().size());
     }
 
     @Test
@@ -92,6 +98,9 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2022, 01, 01))
                 .mpa(new MPA(1, "G"))
                 .genres(new HashSet<>(Arrays.asList(new Genre(1, "Комедия"), new Genre(2, "Драма"))))
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Режиссер1"),
+                        new Director(2, "Режиссер2"))))
                 .build();
         film.setId(999);
 
@@ -164,6 +173,48 @@ public class FilmDbStorageTest {
         filmDbStorage.removeFilm(1);
         film = filmDbStorage.getById(1).orElse(null);
         assertNull(film);
+    }
+
+    @Test
+    void getFilmsByDirector() {
+        assertEquals(filmDbStorage.getFilmsByDirector(1, "likes").size(),
+                filmDbStorage.getFilmsByDirector(1, "year").size(),
+                "Количество фильмов режиссера с id = 1, отсортированных по лайкам, не совпадает с количеством" +
+                        "его же фильмов, отсортированных по годам");
+        assertTrue(filmDbStorage.getFilmsByDirector(2, "year").size() == 2,
+                "Количество фильмов режиссера с id = 2 в БД не совпадает с добавленным количеством фильмов " +
+                        "в БД этого режиссера");
+
+        int notExistingId = 1111;
+        DirectorNotFoundException directorNotFoundException = assertThrows(DirectorNotFoundException.class,
+                () -> filmDbStorage.getFilmsByDirector(notExistingId, "likes"));
+
+        assertEquals("Режиссер с id = " + notExistingId + " отсутствует в БД.",
+                directorNotFoundException.getMessage(), "В БД найден режиссер с несуществующим id");
+    }
+
+    @Test
+    void getFilmsByDirectorSortByLikes() {
+        List<Film> sortedByLikesFilmsOfDirector2 = List.of(
+                filmDbStorage.getById(3).get(),
+                filmDbStorage.getById(2).get());
+
+        assertEquals(filmDbStorage.getFilmsByDirector(2, "likes"),
+                sortedByLikesFilmsOfDirector2,
+                "Полученный из БД список фильмов режиссера с id = 2, отсортированных по лайкам, не совпадает " +
+                        "с фактическим списком фильмов этого режиссера, отсортированных по лайкам");
+    }
+
+    @Test
+    void getFilmsByDirectorSortByYear() {
+        List<Film> sortedByLikesFilmsOfDirector2 = List.of(
+                filmDbStorage.getById(3).get(),
+                filmDbStorage.getById(2).get());
+
+        assertEquals(filmDbStorage.getFilmsByDirector(2, "year"),
+                sortedByLikesFilmsOfDirector2,
+                "Полученный из БД список фильмов режиссера с id = 2, отсортированных по годам, не совпадает " +
+                        "с фактическим списком фильмов этого режиссера, отсортированных по годам");
     }
 }
 
