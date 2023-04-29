@@ -61,8 +61,7 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User createUser(@RequestBody @Valid User user, BindingResult bindingResult) {
-        log.info("Создаем пользователя: {}", user);
-        generateCustomValidateException(user, bindingResult);
+        log.info("Создаем пользователя: {}", user);generateCustomValidateException(user, bindingResult);
         validateService.validateUser(user);
         return userService.createUser(user);
     }

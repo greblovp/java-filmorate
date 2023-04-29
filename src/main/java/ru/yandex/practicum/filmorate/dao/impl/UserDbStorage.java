@@ -123,6 +123,14 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public void removeUser(int userId) {
+        String sqlQuery =
+                "DELETE FROM \"user\" " +
+                        "WHERE user_id = ?";
+        jdbcTemplate.update(sqlQuery, userId);
+    }
+
+    @Override
     public Collection<Film> getFilmRecommendations(int userId) throws EmptyResultDataAccessException {
         // Запрос пользователя с максимальным количеством пересечений лайков
         String sqlQuery1 =
@@ -157,13 +165,6 @@ public class UserDbStorage implements UserStorage {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
-    }
-
-    public void removeUser(int userId) {
-        String sqlQuery =
-                "DELETE FROM \"user\" " +
-                        "WHERE user_id = ?";
-        jdbcTemplate.update(sqlQuery, userId);
     }
 
     private User makeUser(ResultSet rs) throws SQLException {

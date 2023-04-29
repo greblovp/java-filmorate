@@ -87,6 +87,14 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public void removeUser(int userId) {
+        User user = checkUserId(userId);
+
+        userStorage.removeUser(userId);
+
+        log.debug("Удален пользователь {}", user);
+    }
+
     public Collection<Film> getFilmRecommendations(int userId) {
         checkUserId(userId);
         try {
@@ -95,14 +103,6 @@ public class UserService {
             log.info("Рекомедации по фильмам для пользователя с ID = {} отсутствуют", userId);
             return Collections.emptyList();
         }
-    }
-
-    public void removeUser(int userId) {
-        User user = checkUserId(userId);
-
-        userStorage.removeUser(userId);
-
-        log.debug("Удален пользователь {}", user);
     }
 
     private User checkUserId(int id) {

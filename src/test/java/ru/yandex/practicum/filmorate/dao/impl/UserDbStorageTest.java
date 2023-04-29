@@ -15,7 +15,11 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -132,15 +136,6 @@ class UserDbStorageTest {
     }
 
     @Test
-    public void testGetFilmRecommendations() {
-        Film expectedFilm = filmDbStorage.getById(2).get();
-        Collection<Film> films = userDbStorage.getFilmRecommendations(3);
-        Film actualFilm = films.iterator().next();
-
-        assertEquals(1, films.size());
-        assertEquals(expectedFilm, actualFilm);
-    }
-    @Test
     public void testRemoveUser() {
         User user = userDbStorage.getById(1).orElse(null);
         assertNotNull(user);
@@ -150,4 +145,13 @@ class UserDbStorageTest {
         assertNull(user);
     }
 
+    @Test
+    public void testGetFilmRecommendations() {
+        Film expectedFilm = filmDbStorage.getById(2).get();
+        Collection<Film> films = userDbStorage.getFilmRecommendations(3);
+        Film actualFilm = films.iterator().next();
+
+        assertEquals(1, films.size());
+        assertEquals(expectedFilm, actualFilm);
+    }
 }
