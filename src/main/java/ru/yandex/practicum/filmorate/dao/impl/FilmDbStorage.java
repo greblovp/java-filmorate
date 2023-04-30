@@ -181,7 +181,8 @@ public class FilmDbStorage implements FilmStorage {
                         "AND t2.user_id <> t1.user_id " +
                         "WHERE t1.user_id = ? " +
                         "GROUP BY t2.user_id " +
-                        "ORDER BY COUNT(t2.film_id) DESC) " +
+                        "ORDER BY COUNT(t2.film_id) DESC " +
+                        "LIMIT 1) " +
 
                         "SELECT rec.film_id " +
                         "FROM film_like rec " +
