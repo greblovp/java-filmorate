@@ -22,7 +22,8 @@ public class ValidateService {
     public void validateFilm(Film film) {
         if (film.getReleaseDate().isBefore(FIRST_RELEASE_DATE)) {
             log.warn("Дата релиза должна быть больше 28 декабря 1895 года: {}", film);
-            throw new FilmValidationException("Дата релиза должна быть больше 28 декабря 1895 года - день рождения кино");
+            throw new FilmValidationException(
+                    "Дата релиза должна быть больше 28 декабря 1895 года - день рождения кино");
         }
     }
 }

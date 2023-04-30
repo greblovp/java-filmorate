@@ -5,6 +5,8 @@ import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.List;
+
 import java.util.Collection;
 import java.util.Collections;
 
@@ -18,6 +20,11 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
     @Override
     public void removeLike(Film film, User user) {
         film.getLikes().remove(user.getId());
+    }
+
+    @Override
+    public List<Film> getFilmsByDirector(int directorId) {
+        return null; // это заглушка
     }
 
     @Deprecated

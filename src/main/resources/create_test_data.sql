@@ -67,6 +67,17 @@ values (2,4);
 insert into film_like (film_id, user_id)
 values (3,3);
 
+insert into director (name)
+values('Director1'),
+      ('Director2'),
+      ('Director3');
+
+insert into film_x_director (film_id, director_id)
+values (1, 1),
+       (2, 2),
+       (3, 3),
+       (3, 2);
+
 insert into review (creator_user_id, reviewed_film_id, content, is_positive) --1 (score: 2)
 values (1, 1, 'Ничо так, могли бы и лучше.', true);
 insert into review (creator_user_id, reviewed_film_id, content, is_positive) --2 (score: 4)
@@ -106,3 +117,8 @@ insert into review_like (review_id, user_id, score) values (5, 4, -1);
 insert into review_like (review_id, user_id, score) values (6, 1, 1);
 insert into review_like (review_id, user_id, score) values (6, 2, 1);
 insert into review_like (review_id, user_id, score) values (6, 3, 1);
+
+insert into event (user_id, event_type, action_type, entity_id, event_dttm)
+values (1,'LIKE','ADD',1,now());
+insert into event (user_id, event_type, action_type, entity_id, event_dttm)
+values (1,'FRIEND','REMOVE',2,now());
