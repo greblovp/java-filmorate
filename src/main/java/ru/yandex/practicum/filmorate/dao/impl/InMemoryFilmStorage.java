@@ -40,7 +40,6 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
     public Collection<Film> getFilmRecommendations(int userId) {
         return Collections.emptyList();
     }
-}
 
     @Deprecated
     public Collection<Film> getCommonFilms(int userId, int friendId) {

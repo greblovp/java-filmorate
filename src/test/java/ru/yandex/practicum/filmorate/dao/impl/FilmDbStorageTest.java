@@ -210,8 +210,6 @@ public class FilmDbStorageTest {
         assertEquals(1, films.size());
         assertEquals(expectedFilm, actualFilm);
     }
-}
-
 
     @Test
     void getFilmsByDirector() {
