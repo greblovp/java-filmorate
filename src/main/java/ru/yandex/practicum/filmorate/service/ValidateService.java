@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.DirectorValidationException;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -22,7 +24,14 @@ public class ValidateService {
     public void validateFilm(Film film) {
         if (film.getReleaseDate().isBefore(FIRST_RELEASE_DATE)) {
             log.warn("Дата релиза должна быть больше 28 декабря 1895 года: {}", film);
-            throw new FilmValidationException("Дата релиза должна быть больше 28 декабря 1895 года - день рождения кино");
+            throw new FilmValidationException(
+                    "Дата релиза должна быть больше 28 декабря 1895 года - день рождения кино");
+        }
+    }
+
+    public void validateDirector(Director director) {
+        if (director.getName().isBlank() || director.getName() == null) {
+            throw new DirectorValidationException("Имя режиссера не может быть пустым.");
         }
     }
 }
