@@ -39,9 +39,13 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopular(@RequestParam(defaultValue = "10") int count) {
-        log.info("Вывести ТОП {} фильмов", count);
-        return filmService.getTop(count);
+    public Collection<Film> getPopular(@RequestParam(defaultValue = "10") int count,
+                                       @RequestParam(defaultValue = "0") String genreId,
+                                       @RequestParam(defaultValue = "0") String year) {
+        log.info("Вывести ТОП {} фильмов, жанр: {}, год: {}", count, genreId, year);
+
+        return filmService.getTop(count, genreId == null ? 0 : Integer.parseInt(genreId),
+                year == null ? 0 : Integer.parseInt(year));
     }
 
     @PutMapping("/{filmId}/like/{userId}")
@@ -75,12 +79,6 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
-    @GetMapping("/director/{directorId}")
-    public Collection<Film> findFilmsByDirector(@PathVariable int directorId, @RequestParam String sortBy) {
-        log.info("Вывести все фильмы режиссера {} с сортировкой по {}.", directorId, sortBy);
-        return filmService.getFilmsByDirector(directorId, sortBy);
-    }
-
     @DeleteMapping("/{filmId}")
     public void removeFilm(@PathVariable int filmId) {
         log.info("Удаляем фильм: {}", filmId);
@@ -91,6 +89,12 @@ public class FilmController {
     public Collection<Film> getCommonFilms(@RequestParam int userId,
                                            @RequestParam int friendId) {
         return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> findFilmsByDirector(@PathVariable int directorId, @RequestParam String sortBy) {
+        log.info("Вывести все фильмы режиссера {} с сортировкой по {}.", directorId, sortBy);
+        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 
     private void generateCustomValidateException(Film film, BindingResult bindingResult) {

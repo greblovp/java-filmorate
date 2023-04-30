@@ -139,12 +139,12 @@ class FilmControllerTest {
     @SneakyThrows
     public void testGetPopular() {
         int count = 5;
-        when(filmService.getTop(count)).thenReturn(Collections.emptyList());
+        when(filmService.getTop(count, 0, 0)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/films/popular?count=" + count))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
-        verify(filmService, times(1)).getTop(count);
+        verify(filmService, times(1)).getTop(count, 0, 0);
     }
 
     @Test
@@ -214,6 +214,21 @@ class FilmControllerTest {
 
         verify(filmService).getFilmsByDirector(1, "likes");
         assertEquals(objectMapper.writeValueAsString(List.of(filmToCreate1, filmToCreate2)), response);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testGetPopularByGenreAndYear() {
+        int count = 5;
+        int genreId = 1;
+        int year = 1999;
+        when(filmService.getTop(count, genreId, year)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/films/popular?count=" + count + "&genreId=" + genreId +
+                        "&year=" + year))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+        verify(filmService, times(1)).getTop(count, genreId, year);
     }
     @Test
     @SneakyThrows

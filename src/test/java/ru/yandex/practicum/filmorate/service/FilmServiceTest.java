@@ -140,7 +140,7 @@ class FilmServiceTest {
     void getTop() {
         when(filmStorage.get()).thenReturn(List.of(film, popularFilm));
 
-        Collection<Film> top = filmService.getTop(3);
+        Collection<Film> top = filmService.getTop(3, 0, 0);
 
         verify(filmStorage).get();
         assertEquals(2, top.size());
@@ -151,7 +151,7 @@ class FilmServiceTest {
     void getTopWithLimit() {
         when(filmStorage.get()).thenReturn(List.of(film, popularFilm));
 
-        Collection<Film> top = filmService.getTop(1);
+        Collection<Film> top = filmService.getTop(1, 0, 0);
 
         verify(filmStorage).get();
         assertEquals(1, top.size());
@@ -294,5 +294,16 @@ class FilmServiceTest {
 
         assertEquals(2, result.size());
         assertEquals(List.of(film1, film2), result);
+    }
+
+    @Test
+    public void testPopularByGenreAndYear() {
+        when(filmStorage.getPopularByGenreAndYear(10, 0, 2010)).thenReturn(List.of(popularFilm));
+
+        Collection<Film> top = filmService.getTop(10, 0, 2010);
+
+        verify(filmStorage).getPopularByGenreAndYear(10, 0, 2010);
+        assertEquals(1, top.size());
+        assertEquals(List.of(popularFilm), top);
     }
 }

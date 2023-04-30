@@ -32,6 +32,11 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
     }
 
     @Deprecated
+    public Collection<Film> getPopularByGenreAndYear(int count, int genreId, int year) {
+        return null;
+    }
+
+    @Deprecated
     public Collection<Film> getCommonFilms(int userId, int friendId) {
         return Collections.emptyList();
     }

@@ -69,11 +69,15 @@ public class FilmService {
         log.debug("Удален лайк от пользователя ID = {} в фильме: {}", userId, film);
     }
 
-    public Collection<Film> getTop(int count) {
-        return filmStorage.get().stream()
-                .sorted(this::compare)
-                .limit(count)
-                .collect(Collectors.toList());
+    public Collection<Film> getTop(int count, int genreId, int year) {
+        log.info("Получаем список из {} популярных фильмов", count);
+        if (genreId == 0 && year == 0) {
+            return filmStorage.get().stream()
+                    .sorted(this::compare)
+                    .limit(count)
+                    .collect(Collectors.toList());
+        }
+        return filmStorage.getPopularByGenreAndYear(count, genreId, year);
     }
 
     public Collection<Film> getFilmsByDirector(int directorId, String sortBy) {
