@@ -230,6 +230,7 @@ class FilmControllerTest {
                 .andExpect(jsonPath("$").isArray());
         verify(filmService, times(1)).getTop(count, genreId, year);
     }
+
     @Test
     @SneakyThrows
     public void testGetCommonFilms() {
