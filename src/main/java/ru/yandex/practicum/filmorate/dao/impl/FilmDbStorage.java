@@ -153,6 +153,7 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE fd.director_id = ?;";
         return jdbcTemplate.query(queryFilmSelect, (rs, rowNum) -> makeFilm(rs), directorId);
     }
+
     public Collection<Film> getPopularByGenreAndYear(int count, int genreId, int year) {
         List<Film> films;
         String sqlQuery;
