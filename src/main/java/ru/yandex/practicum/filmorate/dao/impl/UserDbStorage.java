@@ -23,7 +23,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final FilmDbStorage filmStorage;
 
     @Override
     public Collection<User> get() {
