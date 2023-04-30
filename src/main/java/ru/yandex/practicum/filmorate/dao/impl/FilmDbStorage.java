@@ -6,9 +6,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.DirectorStorage;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.GenreStorage;
 import ru.yandex.practicum.filmorate.dao.MPAStorage;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
@@ -27,7 +29,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final GenreStorage genreStorage;
     private final MPAStorage mpaStorage;
-
+    private final DirectorStorage directorStorage;
 
     @Override
     public Collection<Film> get() {
@@ -77,22 +79,15 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         int filmId = (int) keyHolder.getKey().longValue();
+        film.setId(filmId);
 
-        if (film.getGenres() == null) {
-            Film createdFilm = getById(filmId).orElse(null);
-            log.info("Фильм {} добавлен в базу данных", createdFilm);
-            return createdFilm;
+        if (film.getGenres() != null) {
+            updateGenresSet(film);
         }
 
-        String genreSqlQuery =
-                "INSERT INTO film_x_genre (film_id, genre_id) " +
-                        "VALUES (?, ?)";
-
-        film.getGenres().forEach(genre -> {
-            jdbcTemplate.update(genreSqlQuery,
-                    filmId,
-                    genre.getId());
-        });
+        if (film.getDirectors() != null) {
+            updateDirectorsSet(film);
+        }
 
         Film createdFilm = getById(filmId).orElse(null);
         log.info("Фильм {} добавлен в базу данных", createdFilm);
@@ -118,27 +113,15 @@ public class FilmDbStorage implements FilmStorage {
             return Optional.empty();
         }
 
-        String genreDeleteSqlQuery =
-                "DELETE FROM film_x_genre " +
-                        "WHERE film_id = ?";
-
-        jdbcTemplate.update(genreDeleteSqlQuery, film.getId());
-
-        if (film.getGenres() == null) {
-            Optional<Film> updatedFilm = this.getById(film.getId());
-            log.info("Фильм {} обновлен в базе данных", updatedFilm);
-            return updatedFilm;
+        deleteOldGenresSet(film);
+        if (film.getGenres() != null) {
+            updateGenresSet(film);
         }
 
-        String genreSqlQuery =
-                "INSERT INTO film_x_genre (film_id, genre_id) " +
-                        "VALUES (?, ?)";
-
-        film.getGenres().forEach(genre -> {
-            jdbcTemplate.update(genreSqlQuery,
-                    film.getId(),
-                    genre.getId());
-        });
+        deleteOldDirectorsSet(film);
+        if (film.getDirectors() != null) {
+            updateDirectorsSet(film);
+        }
 
         Optional<Film> updatedFilm = this.getById(film.getId());
         log.info("Фильм {} обновлен в базе данных", updatedFilm);
@@ -162,6 +145,15 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, film.getId(), user.getId());
     }
 
+    @Override
+    public List<Film> getFilmsByDirector(int directorId) {
+        String queryFilmSelect = "SELECT * " +
+                "FROM film AS f " +
+                "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +
+                "WHERE fd.director_id = ?;";
+        return jdbcTemplate.query(queryFilmSelect, (rs, rowNum) -> makeFilm(rs), directorId);
+    }
+
     public void removeFilm(int filmId) {
         String sqlQuery =
                 "DELETE FROM film " +
@@ -180,6 +172,7 @@ public class FilmDbStorage implements FilmStorage {
                 .mpa(mpaStorage.getById(rs.getInt("rating_id")).orElseGet(null))
                 .genres(getGenresByFilmId(filmId))
                 .likes(getLikesByFilmId(filmId))
+                .directors(getDirectorsByFilmId(filmId))
                 .build();
         film.setId(filmId);
         return film;
@@ -208,4 +201,52 @@ public class FilmDbStorage implements FilmStorage {
         return new HashSet<>(likes);
     }
 
+    private Set<Director> getDirectorsByFilmId(int filmId) {
+        String queryFilmXDirectorSelect = "SELECT director_id " +
+                "FROM film_x_director " +
+                "WHERE film_id = ?;";
+
+        List<Integer> directorsIds = jdbcTemplate.queryForList(queryFilmXDirectorSelect, Integer.class, filmId);
+
+        List<Director> allDirectors = directorStorage.get();
+        return allDirectors.stream()
+                .filter(director -> directorsIds.contains(director.getId()))
+                .collect(Collectors.toSet());
+    }
+
+    private void updateDirectorsSet(Film film) {
+        String queryFilmDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
+                "VALUES(?, ?);";
+
+        film.getDirectors().forEach(director -> {
+            jdbcTemplate.update(queryFilmDirectorInsert, film.getId(), director.getId());
+        });
+    }
+
+    private void updateGenresSet(Film film) {
+        String genreSqlQuery =
+                "INSERT INTO film_x_genre (film_id, genre_id) " +
+                        "VALUES (?, ?)";
+
+        film.getGenres().forEach(genre -> {
+            jdbcTemplate.update(genreSqlQuery,
+                    film.getId(),
+                    genre.getId());
+        });
+    }
+
+    private void deleteOldDirectorsSet(Film film) {
+        String queryFilmDirectorDelete = "DELETE FROM film_x_director " +
+                "WHERE film_id = ?;";
+
+        jdbcTemplate.update(queryFilmDirectorDelete, film.getId());
+    }
+
+    private void deleteOldGenresSet(Film film) {
+        String genreDeleteSqlQuery =
+                "DELETE FROM film_x_genre " +
+                        "WHERE film_id = ?";
+
+        jdbcTemplate.update(genreDeleteSqlQuery, film.getId());
+    }
 }

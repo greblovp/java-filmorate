@@ -10,13 +10,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.enums.ActionType;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.*;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,6 +44,8 @@ class FilmControllerTest {
     private MPAService mpaService;
     @MockBean
     private GenreService genreService;
+    @MockBean
+    private DirectorService directorService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -173,5 +178,40 @@ class FilmControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/films/" + filmId))
                 .andExpect(status().isOk());
         verify(filmService, times(1)).removeFilm(filmId);
+    }
+
+    @Test
+    @SneakyThrows
+    void getFilmsByDirectorSortedByLikesOrYear() {
+        Film filmToCreate1 = Film.builder()
+                .name("name1")
+                .description("description1")
+                .releaseDate(LocalDate.of(2001, 1, 1))
+                .duration(100)
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Director1"))))
+                .build();
+        Film filmToCreate2 = Film.builder()
+                .name("name2")
+                .description("description2")
+                .releaseDate(LocalDate.of(2002, 2, 2))
+                .duration(200)
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Director1"))))
+                .build();
+
+        when(filmService.getFilmsByDirector(1, "likes"))
+                .thenReturn(List.of(filmToCreate1, filmToCreate2));
+
+        String response = mockMvc.perform(
+                        get("/films/director/" + 1 + "?sortBy=likes")
+                                .contentType("application/json"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        verify(filmService).getFilmsByDirector(1, "likes");
+        assertEquals(objectMapper.writeValueAsString(List.of(filmToCreate1, filmToCreate2)), response);
     }
 }

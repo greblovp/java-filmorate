@@ -3,11 +3,12 @@ package ru.yandex.practicum.filmorate.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -21,8 +22,10 @@ class FilmServiceTest {
 
     private final UserStorage userStorage = Mockito.mock(UserStorage.class);
     private final FilmStorage filmStorage = Mockito.mock(FilmStorage.class);
+    private final DirectorService directorService = Mockito.mock(DirectorService.class);
 
-    private final FilmService filmService = new FilmService(filmStorage, userStorage);
+
+    private final FilmService filmService = new FilmService(filmStorage, userStorage, directorService);
 
     private Film film = Film.builder()
             .name("name")
@@ -229,5 +232,67 @@ class FilmServiceTest {
         FilmNotFoundException exception = assertThrows(FilmNotFoundException.class, () -> filmService.removeFilm(filmId));
         verify(filmStorage).getById(filmId);
         assertEquals(exception.getMessage(), "Фильм с ID = " + filmId + " не найден.");
+    }
+
+    @Test
+    void getFilmsByDirectorSortByLikes() {
+        Film film1 = Film.builder()
+                .name("name1")
+                .description("description1")
+                .releaseDate(LocalDate.of(2001, 1, 1))
+                .duration(100)
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Director1"))))
+                .likes(new HashSet<>(Arrays.asList(2)))
+                .build();
+        Film film2 = Film.builder()
+                .name("name2")
+                .description("description2")
+                .releaseDate(LocalDate.of(2002, 2, 2))
+                .duration(200)
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Director1"))))
+                .likes(new HashSet<>(Arrays.asList(1, 2)))
+                .build();
+
+        when(filmStorage.getFilmsByDirector(1)).thenReturn(List.of(film2, film1));
+
+        Collection<Film> result = filmService.getFilmsByDirector(1, "likes");
+
+        verify(filmStorage).getFilmsByDirector(1);
+
+        assertEquals(2, result.size());
+        assertEquals(List.of(film2, film1), result);
+    }
+
+    @Test
+    void getFilmsByDirectorSortByYear() {
+        Film film1 = Film.builder()
+                .name("name1")
+                .description("description1")
+                .releaseDate(LocalDate.of(2001, 1, 1))
+                .duration(100)
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Director1"))))
+                .likes(new HashSet<>(Arrays.asList(2)))
+                .build();
+        Film film2 = Film.builder()
+                .name("name2")
+                .description("description2")
+                .releaseDate(LocalDate.of(2002, 2, 2))
+                .duration(200)
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Director1"))))
+                .likes(new HashSet<>(Arrays.asList(1, 2)))
+                .build();
+
+        when(filmStorage.getFilmsByDirector(1)).thenReturn(List.of(film1, film2));
+
+        Collection<Film> result = filmService.getFilmsByDirector(1, "year");
+
+        verify(filmStorage).getFilmsByDirector(1);
+
+        assertEquals(2, result.size());
+        assertEquals(List.of(film1, film2), result);
     }
 }
