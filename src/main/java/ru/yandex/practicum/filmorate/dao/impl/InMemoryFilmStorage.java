@@ -5,6 +5,9 @@ import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.Collection;
+import java.util.Collections;
+
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmStorage {
     @Override
@@ -19,5 +22,10 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
 
     @Deprecated
     public void removeFilm(int filmId) {
+    }
+
+    @Deprecated
+    public Collection<Film> getFilmRecommendations(int userId) {
+        return Collections.emptyList();
     }
 }

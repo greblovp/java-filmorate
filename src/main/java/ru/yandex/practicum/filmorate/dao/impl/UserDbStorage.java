@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.Date;
@@ -19,7 +17,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component("userDbStorage")
 @Slf4j
@@ -128,43 +125,6 @@ public class UserDbStorage implements UserStorage {
                 "DELETE FROM \"user\" " +
                         "WHERE user_id = ?";
         jdbcTemplate.update(sqlQuery, userId);
-    }
-
-    @Override
-    public Collection<Film> getFilmRecommendations(int userId) throws EmptyResultDataAccessException {
-        // Запрос пользователя с максимальным количеством пересечений лайков
-        String sqlQuery1 =
-                "SELECT user_id " +
-                        "FROM film_like " +
-                        "WHERE user_id <> ? AND film_id IN " +
-                        "(SELECT film_id " +
-                        "FROM film_like " +
-                        "WHERE user_id = ?) " +
-                        "GROUP BY user_id " +
-                        "ORDER BY COUNT(film_id) DESC " +
-                        "LIMIT 1";
-        Integer userIdWithMaxLikeIntersections = jdbcTemplate.queryForObject(sqlQuery1,
-                Integer.class,
-                userId,
-                userId);
-        // Поиск уникальных лайков у userIdWithMaxLikeIntersections по отношению к userId
-        String sqlQuery2 =
-                "SELECT film_id " +
-                        "FROM film_like " +
-                        "WHERE user_id = ? AND film_id NOT IN " +
-                        "(SELECT film_id " +
-                        "FROM film_like " +
-                        "WHERE user_id = ?)";
-        // Возвращаем рекомендованные фильмы по id уникальных лайков
-        return jdbcTemplate.queryForList(sqlQuery2,
-                        Integer.class,
-                        userIdWithMaxLikeIntersections,
-                        userId)
-                .stream()
-                .map(filmStorage::getById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
     }
 
     private User makeUser(ResultSet rs) throws SQLException {

@@ -8,18 +8,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -31,8 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class UserDbStorageTest {
 
     private final UserDbStorage userDbStorage;
-    private final FilmDbStorage filmDbStorage;
-
 
     @Test
     void testGetUsers() {
@@ -143,15 +136,5 @@ class UserDbStorageTest {
         userDbStorage.removeUser(1);
         user = userDbStorage.getById(1).orElse(null);
         assertNull(user);
-    }
-
-    @Test
-    public void testGetFilmRecommendations() {
-        Film expectedFilm = filmDbStorage.getById(2).get();
-        Collection<Film> films = userDbStorage.getFilmRecommendations(3);
-        Film actualFilm = films.iterator().next();
-
-        assertEquals(1, films.size());
-        assertEquals(expectedFilm, actualFilm);
     }
 }
