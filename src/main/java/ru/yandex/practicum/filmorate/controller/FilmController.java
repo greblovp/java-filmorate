@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
+import ru.yandex.practicum.filmorate.enums.ActionType;
+import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.ValidateService;
 
@@ -21,6 +24,7 @@ public class FilmController {
 
     private final FilmService filmService;
     private final ValidateService validateService;
+    private final EventService eventService;
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -48,12 +52,14 @@ public class FilmController {
     public void addLike(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Добавляем лайк фильму ID = {} от пользователя ID = {}", filmId, userId);
         filmService.addLike(filmId, userId);
+        eventService.createEvent(userId, ActionType.ADD, EventType.LIKE, filmId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public void removeLike(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Удаляем лайк у фильма ID = {} от пользователя ID = {}", filmId, userId);
         filmService.removeLike(filmId, userId);
+        eventService.createEvent(userId, ActionType.REMOVE, EventType.LIKE, filmId);
     }
 
     @PostMapping
@@ -71,6 +77,12 @@ public class FilmController {
         generateCustomValidateException(film, bindingResult);
         validateService.validateFilm(film);
         return filmService.updateFilm(film);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> findFilmsByDirector(@PathVariable int directorId, @RequestParam String sortBy) {
+        log.info("Вывести все фильмы режиссера {} с сортировкой по {}.", directorId, sortBy);
+        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 
     @DeleteMapping("/{filmId}")

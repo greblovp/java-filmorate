@@ -60,6 +60,12 @@ public class ErrorHandler {
 
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidSortBy(final SortByValidationException e) {
+        return new ErrorResponse("Некорректный тип сортировки", e.getMessage());
+    }
+
+    @ExceptionHandler()
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIncorrectParameter(final UserValidationException e) {
         return new ErrorResponse("Ошибка в заполнении полей пользователя", e.getMessage());
     }

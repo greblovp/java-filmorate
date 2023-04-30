@@ -3,14 +3,17 @@ package ru.yandex.practicum.filmorate.dao.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.DirectorStorage;
-import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Component("directorDbStorage")
 @Slf4j
@@ -28,14 +31,18 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Director getById(int id) {
+    public Optional<Director> getById(int id) {
         String queryDirectorSelect = "SELECT * " +
                 "FROM director " +
                 "WHERE director_id = ?;";
 
         log.info("Получение режиссера с id = {}.", id);
-        checkIfDirectorExists(id);
-        return jdbcTemplate.queryForObject(queryDirectorSelect, (rs, rowNum) -> makeDirector(rs), id);
+
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(queryDirectorSelect, (rs, rowNum) -> makeDirector(rs), id));
+        } catch (RuntimeException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -44,30 +51,36 @@ public class DirectorDbStorage implements DirectorStorage {
                 "VALUES(?);";
 
         log.info("Добавление режиссера {}.", director.getName());
-        jdbcTemplate.update(queryDirectorInsert, director.getName());
 
-        String queryDirectorSelect = "SELECT * " +
-                "FROM director " +
-                "WHERE name = ?;";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        int updatedRowsCount = jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(queryDirectorInsert, new String[]{"director_id"});
+            stmt.setString(1, director.getName());
+            return stmt;
+        }, keyHolder);
 
-        return jdbcTemplate.queryForObject(queryDirectorSelect, (rs, rowNum) -> makeDirector(rs), director.getName());
+        if (updatedRowsCount == 0) {
+            log.info("Произошла ошибка при добавлении режиссера {} в базу данных", director);
+            return null;
+        }
+
+        int directorId = (int) keyHolder.getKey().longValue();
+
+        Director createdDirector = getById(directorId).orElse(null);
+        log.info("Режиссер {} добавлен в базу данных", createdDirector);
+        return createdDirector;
     }
 
     @Override
-    public Director udpate(Director director) {
+    public Optional<Director> udpate(Director director) {
         String queryDirectorUpdate = "UPDATE director " +
                 "SET name = ? " +
                 "WHERE director_id = ?;";
 
         log.info("Обновление режиссера с id = {}.", director.getId());
-        checkIfDirectorExists(director.getId());
+
         jdbcTemplate.update(queryDirectorUpdate, director.getName(), director.getId());
-
-        String queryDirectorSelect = "SELECT * " +
-                "FROM director " +
-                "WHERE director_id = ?;";
-
-        return jdbcTemplate.queryForObject(queryDirectorSelect, (rs, rowNum) -> makeDirector(rs), director.getId());
+        return getById(director.getId());
     }
 
     @Override
@@ -76,7 +89,6 @@ public class DirectorDbStorage implements DirectorStorage {
                 "WHERE director_id = ?;";
 
         log.info("Удаление режиссера с id = {}.", id);
-        checkIfDirectorExists(id);
         jdbcTemplate.update(queryDirectorDelete, id);
     }
 
@@ -85,17 +97,5 @@ public class DirectorDbStorage implements DirectorStorage {
                 rs.getInt("director_id"),
                 rs.getString("name")
         );
-    }
-
-    public void checkIfDirectorExists(int id) {
-        String queryDirectorSelect = "SELECT * " +
-                "FROM director " +
-                "WHERE director_id = ?;";
-
-        try {
-            jdbcTemplate.queryForObject(queryDirectorSelect, (rs, rowNum) -> makeDirector(rs), id);
-        } catch (RuntimeException e) {
-            throw new DirectorNotFoundException("Режиссер с id = " + id + " отсутствует в БД.");
-        }
     }
 }

@@ -5,6 +5,8 @@ import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.List;
+
 import java.util.Collection;
 
 @Component("inMemoryFilmStorage")
@@ -19,6 +21,11 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
         film.getLikes().remove(user.getId());
     }
 
+    @Override
+    public List<Film> getFilmsByDirector(int directorId) {
+        return null; // это заглушка
+    }
+
     @Deprecated
     public void removeFilm(int filmId) {
     }
@@ -26,10 +33,5 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
     @Deprecated
     public Collection<Film> getPopularByGenreAndYear(int count, int genreId, int year) {
         return null;
-    }
-
-    @Override
-    public Collection<Film> getFilmsByDirector(int directorId, String sortType) {
-        return null; // это заглушка
     }
 }
