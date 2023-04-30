@@ -4,13 +4,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import ru.yandex.practicum.filmorate.dao.DirectorStorage;
 import ru.yandex.practicum.filmorate.dao.impl.DirectorDbStorage;
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +38,8 @@ class DirectorServiceTest {
     @Test
     void getDirectorById() {
         createDirectors();
-        when(directorService.getById(director1.getId())).thenReturn(director1);
+        directorService.create(director1);
+        when(directorStorage.getById(director1.getId())).thenReturn(Optional.of(director1));
 
         Director director = directorService.getById(director1.getId());
         assertEquals(director1, director, "Добавленный и полученный режиссеры не совпадают");
@@ -46,11 +49,13 @@ class DirectorServiceTest {
     @Test
     void getDirectorByNotExistingId() {
         createDirectors();
-        when(directorService.getById(333)).thenReturn(null);
+        int notExistingId = 333;
+        DirectorNotFoundException directorNotFoundException = assertThrows(DirectorNotFoundException.class,
+                () -> directorService.getById(notExistingId));
 
-        Director director = directorService.getById(333);
-
-        assertNull(director, "Найден несуществующий режиссер");
+        assertEquals("Режиссер с id = " + notExistingId + " отсутствует в БД.",
+                directorNotFoundException.getMessage(), "В БД найден режиссер с несуществующим id");
+        deleteDirectors();
     }
 
     @Test
@@ -65,12 +70,17 @@ class DirectorServiceTest {
 
     @Test
     void udpateDirector() {
-        Director director3 = Director.builder().name("director3").build();
+        createDirectors();
+        directorService.create(director1);
 
-        when(directorService.udpate(director3)).thenReturn(director3);
-        Director updatedDirector = directorService.udpate(director3);
+        Director directorUpdated = Director.builder().id(1).name("directorUpdated").build();
+        when(directorStorage.udpate(directorUpdated)).thenReturn(Optional.of(directorUpdated));
+        when(directorStorage.getById(directorUpdated.getId())).thenReturn(Optional.of(directorUpdated));
 
-        assertEquals(director3, updatedDirector, "Режиссер в БД не совпадает с обновленным");
+        Director directorUpdatedFromDb = directorService.udpate(directorUpdated);
+
+        assertEquals(directorUpdated, directorUpdatedFromDb, "Режиссер в БД не совпадает с обновленным");
+        deleteDirectors();
     }
 
     @Test
@@ -82,8 +92,8 @@ class DirectorServiceTest {
     }
 
     void createDirectors() {
-        director1 = Director.builder().name("director1").build();
-        director2 = Director.builder().name("director2").build();
+        director1 = Director.builder().id(1).name("director1").build();
+        director2 = Director.builder().id(2).name("director2").build();
         directors.add(director1);
         directors.add(director2);
     }

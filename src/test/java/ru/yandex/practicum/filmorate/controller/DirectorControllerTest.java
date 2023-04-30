@@ -7,21 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.dao.impl.DirectorDbStorage;
-import ru.yandex.practicum.filmorate.exception.DirectorValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.ValidateService;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,9 +29,6 @@ class DirectorControllerTest {
     private FilmService filmService;
     @MockBean
     private DirectorService directorService;
-    private DirectorController directorController = new DirectorController(
-            new DirectorService(new DirectorDbStorage(new JdbcTemplate())),
-            new ValidateService());
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -92,19 +84,27 @@ class DirectorControllerTest {
     }
 
     @Test
+    @SneakyThrows
     void createDirectorWithInCorrectParams() {
         Director director4 = Director.builder().name(null).build();
+
+        when(directorService.create(director4)).thenReturn(director4);
+
+        mockMvc.perform(post("/directors")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(director4)))
+                .andExpect(status().isBadRequest());
+
+        verify(directorService, never()).create(any());
+
         Director director5 = Director.builder().name("     ").build();
 
-        DirectorValidationException directorValidationException4 = assertThrows(DirectorValidationException.class,
-                () -> directorController.create(director4));
-        assertEquals("Имя режиссера не может быть пустым.", directorValidationException4.getMessage(),
-                "В БД добавлен режиссер с недопустимым именем = " + director4.getName());
+        when(directorService.create(director5)).thenReturn(director5);
 
-        DirectorValidationException directorValidationException5 = assertThrows(DirectorValidationException.class,
-                () -> directorController.create(director5));
-        assertEquals("Имя режиссера не может быть пустым.", directorValidationException5.getMessage(),
-                "В БД добавлен режиссер с недопустимым именем = " + director5.getName());
+        mockMvc.perform(post("/directors").contentType("application/json").content(objectMapper.writeValueAsString(director5)))
+                .andExpect(status().isBadRequest());
+
+        verify(directorService, never()).create(any());
     }
 
     @Test
@@ -127,18 +127,25 @@ class DirectorControllerTest {
     }
 
     @Test
+    @SneakyThrows
     void updateDirectorWithInCorrectParams() {
         Director director1 = Director.builder().id(1).name(null).build();
         Director director2 = Director.builder().id(2).name("     ").build();
 
-        DirectorValidationException directorValidationException4 = assertThrows(DirectorValidationException.class,
-                () -> directorController.update(director1));
-        assertEquals("Имя режиссера не может быть пустым.", directorValidationException4.getMessage(),
-                "В БД режиссеру с id = 1 изменено имя на недопустимое - " + director1.getName());
+        when(directorService.udpate(director1)).thenReturn(director1);
 
-        DirectorValidationException directorValidationException5 = assertThrows(DirectorValidationException.class,
-                () -> directorController.update(director2));
-        assertEquals("Имя режиссера не может быть пустым.", directorValidationException5.getMessage(),
-                "В БД режиссеру с id = 1 изменено имя на недопустимое - " + director2.getName());
+        mockMvc.perform(put("/directors")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(director1)))
+                .andExpect(status().isBadRequest());
+
+        verify(directorService, never()).udpate(any());
+
+        when(directorService.udpate(director2)).thenReturn(director2);
+
+        mockMvc.perform(put("/directors").contentType("application/json").content(objectMapper.writeValueAsString(director2)))
+                .andExpect(status().isBadRequest());
+
+        verify(directorService, never()).udpate(any());
     }
 }

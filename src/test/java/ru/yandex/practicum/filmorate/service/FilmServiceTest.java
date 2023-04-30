@@ -22,8 +22,10 @@ class FilmServiceTest {
 
     private final UserStorage userStorage = Mockito.mock(UserStorage.class);
     private final FilmStorage filmStorage = Mockito.mock(FilmStorage.class);
+    private final DirectorService directorService = Mockito.mock(DirectorService.class);
 
-    private final FilmService filmService = new FilmService(filmStorage, userStorage);
+
+    private final FilmService filmService = new FilmService(filmStorage, userStorage, directorService);
 
     private Film film = Film.builder()
             .name("name")

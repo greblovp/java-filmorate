@@ -79,26 +79,14 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         int filmId = (int) keyHolder.getKey().longValue();
+        film.setId(filmId);
 
         if (film.getGenres() != null) {
-            String genreSqlQuery =
-                    "INSERT INTO film_x_genre (film_id, genre_id) " +
-                            "VALUES (?, ?)";
-
-            film.getGenres().forEach(genre -> {
-                jdbcTemplate.update(genreSqlQuery,
-                        filmId,
-                        genre.getId());
-            });
+            updateGenresSet(film);
         }
 
         if (film.getDirectors() != null) {
-            String queryDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
-                    "VALUES(?, ?);";
-
-            film.getDirectors().forEach(director -> {
-                jdbcTemplate.update(queryDirectorInsert, filmId, director.getId());
-            });
+            updateDirectorsSet(film);
         }
 
         Film createdFilm = getById(filmId).orElse(null);
@@ -125,36 +113,14 @@ public class FilmDbStorage implements FilmStorage {
             return Optional.empty();
         }
 
-        String genreDeleteSqlQuery =
-                "DELETE FROM film_x_genre " +
-                        "WHERE film_id = ?";
-
-        jdbcTemplate.update(genreDeleteSqlQuery, film.getId());
-
+        deleteOldGenresSet(film);
         if (film.getGenres() != null) {
-            String genreSqlQuery =
-                    "INSERT INTO film_x_genre (film_id, genre_id) " +
-                            "VALUES (?, ?)";
-
-            film.getGenres().forEach(genre -> {
-                jdbcTemplate.update(genreSqlQuery,
-                        film.getId(),
-                        genre.getId());
-            });
+            updateGenresSet(film);
         }
 
-        String queryFilmDirectorDelete = "DELETE FROM film_x_director " +
-                "WHERE film_id = ?;";
-
-        jdbcTemplate.update(queryFilmDirectorDelete, film.getId());
-
+        deleteOldDirectorsSet(film);
         if (film.getDirectors() != null) {
-            String queryFilmDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
-                    "VALUES(?, ?);";
-
-            film.getDirectors().forEach(director -> {
-                jdbcTemplate.update(queryFilmDirectorInsert, film.getId(), director.getId());
-            });
+            updateDirectorsSet(film);
         }
 
         Optional<Film> updatedFilm = this.getById(film.getId());
@@ -181,30 +147,27 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getFilmsByDirector(int directorId, String sortBy) {
-        directorStorage.checkIfDirectorExists(directorId);
-        String queryFilmsSelect = "SELECT * " +
-                "FROM film AS f " +
-                "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +
-                "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
-                "WHERE d.director_id = ?;";
-
-        List<Film> allFilmsByDirector = jdbcTemplate.query(queryFilmsSelect, (rs, rowNum) -> makeFilm(rs), directorId);
-
-        if (sortBy.equals("year")) {
-            Collections.sort(allFilmsByDirector,
-                    (film1, film2) -> {
-                        if (film1.getReleaseDate().isAfter(film2.getReleaseDate())) {
-                            return 1;
-                        } else {
-                            return -1;
-                        }
-                    });
+        if (sortBy.equals("likes")) {
+            String queryFilmsSelectAndGroupByLikes =
+                    "SELECT f.film_id, f.name, f.description, f.release_dt, f.duration, f.rating_id, " +
+                            "COUNT(fl.user_id) as likes " +
+                            "FROM film AS f " +
+                            "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +
+                            "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
+                            "LEFT JOIN film_like AS fl ON f.film_id = fl.film_id " +
+                            "WHERE d.director_id = ? " +
+                            "GROUP BY f.film_id " +
+                            "ORDER BY likes, f.film_id;";
+            return jdbcTemplate.query(queryFilmsSelectAndGroupByLikes, (rs, rowNum) -> makeFilm(rs), directorId);
         } else {
-            Collections.sort(allFilmsByDirector,
-                    Comparator.comparingInt(film -> film.getLikes().size()));
+            String queryFilmsSelectAndGroupByYear = "SELECT * " +
+                    "FROM film AS f " +
+                    "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +
+                    "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
+                    "WHERE d.director_id = ? " +
+                    "ORDER BY f.release_dt, f.film_id;";
+            return jdbcTemplate.query(queryFilmsSelectAndGroupByYear, (rs, rowNum) -> makeFilm(rs), directorId);
         }
-
-        return allFilmsByDirector;
     }
 
     public void removeFilm(int filmId) {
@@ -265,5 +228,41 @@ public class FilmDbStorage implements FilmStorage {
         return allDirectors.stream()
                 .filter(director -> directorsIds.contains(director.getId()))
                 .collect(Collectors.toSet());
+    }
+
+    private void updateDirectorsSet(Film film) {
+        String queryFilmDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
+                "VALUES(?, ?);";
+
+        film.getDirectors().forEach(director -> {
+            jdbcTemplate.update(queryFilmDirectorInsert, film.getId(), director.getId());
+        });
+    }
+
+    private void updateGenresSet(Film film) {
+        String genreSqlQuery =
+                "INSERT INTO film_x_genre (film_id, genre_id) " +
+                        "VALUES (?, ?)";
+
+        film.getGenres().forEach(genre -> {
+            jdbcTemplate.update(genreSqlQuery,
+                    film.getId(),
+                    genre.getId());
+        });
+    }
+
+    private void deleteOldDirectorsSet(Film film) {
+        String queryFilmDirectorDelete = "DELETE FROM film_x_director " +
+                "WHERE film_id = ?;";
+
+        jdbcTemplate.update(queryFilmDirectorDelete, film.getId());
+    }
+
+    private void deleteOldGenresSet(Film film) {
+        String genreDeleteSqlQuery =
+                "DELETE FROM film_x_genre " +
+                        "WHERE film_id = ?";
+
+        jdbcTemplate.update(genreDeleteSqlQuery, film.getId());
     }
 }

@@ -8,11 +8,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
-import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,7 +40,7 @@ public class DirectorDbStorageTest {
 
     @Test
     void getDirectorByExistingId() {
-        Director director = directorDbStorage.getById(1);
+        Director director = directorDbStorage.getById(1).get();
         assertEquals("Director1", director.getName(),
                 "Имя полученного режиссера не совпадает с именем в БД");
 
@@ -50,10 +50,8 @@ public class DirectorDbStorageTest {
     void getDirectorByNotExistingId() {
         int notExistingId = 1111;
 
-        DirectorNotFoundException directorNotFoundException = assertThrows(DirectorNotFoundException.class,
-                () -> directorDbStorage.getById(notExistingId));
-        assertEquals("Режиссер с id = " + notExistingId + " отсутствует в БД.",
-                directorNotFoundException.getMessage(), "Из БД получен режиссер по несуществующему id");
+        Optional<Director> director = directorDbStorage.getById(notExistingId);
+        assertTrue(director.isEmpty(), "Из БД получен режиссер с несуществующим id");
     }
 
     @Test
@@ -64,7 +62,7 @@ public class DirectorDbStorageTest {
 
         assertTrue(directorDbStorage.get().size() == currentDirectorsListSize + 1,
                 "После добавления режиссера размер списка режиссеров не корректный");
-        assertEquals(directorDbStorage.getById(4).getName(), director4.getName(),
+        assertEquals(directorDbStorage.getById(4).get().getName(), director4.getName(),
                 "Имена добавленного и полученного режиссера не совпадают");
     }
 
@@ -76,7 +74,7 @@ public class DirectorDbStorageTest {
 
         assertTrue(directorDbStorage.get().size() == currentDirectorsListSize,
                 "После изменения режиссера изменился размер списка режиссеров");
-        assertEquals(directorDbStorage.getById(1).getName(), updatedDirector1.getName(),
+        assertEquals(directorDbStorage.getById(1).get().getName(), updatedDirector1.getName(),
                 "Именя измененного и полученного режиссера не совпадают");
     }
 
@@ -104,21 +102,9 @@ public class DirectorDbStorageTest {
         List<Director> directorList = directorDbStorage.get();
         int currentDirectorsListSize = directorList.size();
         int notExistingId = currentDirectorsListSize + 100;
+        directorDbStorage.delete(notExistingId);
 
-        DirectorNotFoundException directorNotFoundException = assertThrows(DirectorNotFoundException.class,
-                () -> directorDbStorage.delete(notExistingId));
-
-        assertEquals("Режиссер с id = " + notExistingId + " отсутствует в БД.",
-                directorNotFoundException.getMessage(), "Из БД удален режиссер с несуществующим id");
-    }
-
-    @Test
-    void checkIfDirectorExistsForNotExistingDirector() {
-        int notExistingId = 3333;
-        DirectorNotFoundException directorNotFoundException = assertThrows(DirectorNotFoundException.class,
-                () -> directorDbStorage.checkIfDirectorExists(notExistingId));
-
-        assertEquals("Режиссер с id = " + notExistingId + " отсутствует в БД.",
-                directorNotFoundException.getMessage(), "В БД найден режиссер с несуществующим id");
+        assertEquals(directorDbStorage.get().size(), currentDirectorsListSize,
+                "После удаления несуществующего режиссера изменилось количество режиссеров в БД");
     }
 }

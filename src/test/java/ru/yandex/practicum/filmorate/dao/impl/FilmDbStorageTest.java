@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
-import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
@@ -179,18 +178,14 @@ public class FilmDbStorageTest {
     void getFilmsByDirector() {
         assertEquals(filmDbStorage.getFilmsByDirector(1, "likes").size(),
                 filmDbStorage.getFilmsByDirector(1, "year").size(),
-                "Количество фильмов режиссера с id = 1, отсортированных по лайкам, не совпадает с количеством" +
+                "Количество фильмов режиссера с id = 1, отсортированных по лайкам, не совпадает с количеством " +
                         "его же фильмов, отсортированных по годам");
         assertTrue(filmDbStorage.getFilmsByDirector(2, "year").size() == 2,
                 "Количество фильмов режиссера с id = 2 в БД не совпадает с добавленным количеством фильмов " +
                         "в БД этого режиссера");
 
-        int notExistingId = 1111;
-        DirectorNotFoundException directorNotFoundException = assertThrows(DirectorNotFoundException.class,
-                () -> filmDbStorage.getFilmsByDirector(notExistingId, "likes"));
-
-        assertEquals("Режиссер с id = " + notExistingId + " отсутствует в БД.",
-                directorNotFoundException.getMessage(), "В БД найден режиссер с несуществующим id");
+        assertTrue(filmDbStorage.getFilmsByDirector(3333, "year").isEmpty(),
+                "Из БД получены фильмы несуществующего режиссера");
     }
 
     @Test
@@ -217,5 +212,3 @@ public class FilmDbStorageTest {
                         "с фактическим списком фильмов этого режиссера, отсортированных по годам");
     }
 }
-
-
