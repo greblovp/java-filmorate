@@ -214,6 +214,7 @@ class FilmControllerTest {
         verify(filmService).getFilmsByDirector(1, "likes");
         assertEquals(objectMapper.writeValueAsString(List.of(filmToCreate1, filmToCreate2)), response);
     }
+
     @Test
     @SneakyThrows
     public void testGetPopularByGenreAndYear() {
