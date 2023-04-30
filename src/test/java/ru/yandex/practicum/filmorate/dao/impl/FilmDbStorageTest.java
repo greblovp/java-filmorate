@@ -11,10 +11,7 @@ import org.springframework.test.context.jdbc.SqlGroup;
 import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -182,7 +179,6 @@ public class FilmDbStorageTest {
         Collection<Film> films = filmDbStorage.getCommonFilms(1, 2);
         assertEquals(2, films.size());
     }
-}
 
 
     @Test
