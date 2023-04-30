@@ -25,7 +25,7 @@ public class EventService {
         return eventStorage.getByUserId(userId);
     }
 
-    public Event createEvent(int userId, EventType eventType, ActionType actionType, long entityId) {
+    public Event createEvent(int userId, ActionType actionType, EventType eventType, long entityId) {
         return eventStorage.create(userId, eventType, actionType, entityId);
     }
 }

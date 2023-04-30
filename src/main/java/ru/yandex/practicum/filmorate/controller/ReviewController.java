@@ -41,7 +41,7 @@ public class ReviewController {
         log.info("Создать отзыв: {}", review);
         generateCustomValidateException(review, bindingResult);
         Review createdReview = reviewService.createReview(review);
-        eventService.createEvent(createdReview.getUserId(), EventType.REVIEW, ActionType.ADD,
+        eventService.createEvent(createdReview.getUserId(), ActionType.ADD, EventType.REVIEW,
                 createdReview.getReviewId());
         return createdReview;
     }
@@ -51,7 +51,7 @@ public class ReviewController {
         log.info("Обновить отзыв: {}", review);
         generateCustomValidateException(review, bindingResult);
         Review updatedReview = reviewService.updateReview(review);
-        eventService.createEvent(updatedReview.getUserId(), EventType.REVIEW, ActionType.UPDATE,
+        eventService.createEvent(updatedReview.getUserId(), ActionType.UPDATE, EventType.REVIEW,
                 updatedReview.getReviewId());
         return updatedReview;
     }
@@ -73,7 +73,7 @@ public class ReviewController {
         log.info("Удалить отзыв с ID: {}", id);
         Review reviewToRemove = reviewService.findById(id);
         reviewService.removeReview(id);
-        eventService.createEvent(reviewToRemove.getUserId(), EventType.REVIEW, ActionType.REMOVE,
+        eventService.createEvent(reviewToRemove.getUserId(), ActionType.REMOVE, EventType.REVIEW,
                 reviewToRemove.getReviewId());
     }
 

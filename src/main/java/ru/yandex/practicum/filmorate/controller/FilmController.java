@@ -48,14 +48,14 @@ public class FilmController {
     public void addLike(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Добавляем лайк фильму ID = {} от пользователя ID = {}", filmId, userId);
         filmService.addLike(filmId, userId);
-        eventService.createEvent(userId, EventType.LIKE, ActionType.ADD, filmId);
+        eventService.createEvent(userId, ActionType.ADD, EventType.LIKE, filmId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public void removeLike(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Удаляем лайк у фильма ID = {} от пользователя ID = {}", filmId, userId);
         filmService.removeLike(filmId, userId);
-        eventService.createEvent(userId, EventType.LIKE, ActionType.REMOVE, filmId);
+        eventService.createEvent(userId, ActionType.REMOVE, EventType.LIKE, filmId);
     }
 
     @PostMapping

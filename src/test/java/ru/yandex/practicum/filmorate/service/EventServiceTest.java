@@ -53,7 +53,7 @@ class EventServiceTest {
 
         when(eventStorage.create(userId, eventType, actionType, entityId)).thenReturn(event);
 
-        Event result = eventService.createEvent(userId, eventType, actionType, entityId);
+        Event result = eventService.createEvent(userId, actionType, eventType, entityId);
 
         assertEquals(event, result);
         verify(eventStorage, times(1)).create(userId, eventType, actionType, entityId);

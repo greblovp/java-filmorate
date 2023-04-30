@@ -155,7 +155,7 @@ class FilmControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.put("/films/" + filmId + "/like/" + userId))
                 .andExpect(status().isOk());
         verify(filmService, times(1)).addLike(filmId, userId);
-        verify(eventService, times(1)).createEvent(userId, EventType.LIKE, ActionType.ADD, filmId);
+        verify(eventService, times(1)).createEvent(userId, ActionType.ADD, EventType.LIKE, filmId);
     }
 
     @Test
@@ -167,7 +167,7 @@ class FilmControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/films/" + filmId + "/like/" + userId))
                 .andExpect(status().isOk());
         verify(filmService, times(1)).removeLike(filmId, userId);
-        verify(eventService, times(1)).createEvent(userId, EventType.LIKE, ActionType.REMOVE, filmId);
+        verify(eventService, times(1)).createEvent(userId, ActionType.REMOVE, EventType.LIKE, filmId);
     }
 
     @Test

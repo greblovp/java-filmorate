@@ -204,7 +204,7 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         verify(userService).addFriend(userId1, userId2);
-        verify(eventService, times(1)).createEvent(userId1, EventType.FRIEND, ActionType.ADD, userId2);
+        verify(eventService, times(1)).createEvent(userId1, ActionType.ADD, EventType.FRIEND, userId2);
     }
 
     @Test
@@ -215,7 +215,7 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         verify(userService).removeFriend(userId1, userId2);
-        verify(eventService, times(1)).createEvent(userId1, EventType.FRIEND, ActionType.REMOVE, userId2);
+        verify(eventService, times(1)).createEvent(userId1, ActionType.REMOVE, EventType.FRIEND, userId2);
     }
 
     @Test

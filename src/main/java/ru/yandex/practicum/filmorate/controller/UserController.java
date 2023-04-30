@@ -62,14 +62,14 @@ public class UserController {
     public void addFriend(@PathVariable int userId, @PathVariable int friendId) {
         log.info("Добавляем пользователя ID = {} в друзья к пользователю ID = {}", friendId, userId);
         userService.addFriend(userId, friendId);
-        eventService.createEvent(userId, EventType.FRIEND, ActionType.ADD, friendId);
+        eventService.createEvent(userId, ActionType.ADD, EventType.FRIEND, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     public void removeFriend(@PathVariable int userId, @PathVariable int friendId) {
         log.info("Удаляем пользователя ID = {} из друзей пользователя ID = {}", friendId, userId);
         userService.removeFriend(userId, friendId);
-        eventService.createEvent(userId, EventType.FRIEND, ActionType.REMOVE, friendId);
+        eventService.createEvent(userId, ActionType.REMOVE, EventType.FRIEND, friendId);
     }
 
     @PostMapping
