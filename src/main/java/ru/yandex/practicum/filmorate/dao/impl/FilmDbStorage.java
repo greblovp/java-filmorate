@@ -146,28 +146,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getFilmsByDirector(int directorId, String sortBy) {
-        if (sortBy.equals("likes")) {
-            String queryFilmsSelectAndGroupByLikes =
-                    "SELECT f.film_id, f.name, f.description, f.release_dt, f.duration, f.rating_id, " +
-                            "COUNT(fl.user_id) as likes " +
-                            "FROM film AS f " +
-                            "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +
-                            "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
-                            "LEFT JOIN film_like AS fl ON f.film_id = fl.film_id " +
-                            "WHERE d.director_id = ? " +
-                            "GROUP BY f.film_id " +
-                            "ORDER BY likes, f.film_id;";
-            return jdbcTemplate.query(queryFilmsSelectAndGroupByLikes, (rs, rowNum) -> makeFilm(rs), directorId);
-        } else {
-            String queryFilmsSelectAndGroupByYear = "SELECT * " +
-                    "FROM film AS f " +
-                    "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +
-                    "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
-                    "WHERE d.director_id = ? " +
-                    "ORDER BY f.release_dt, f.film_id;";
-            return jdbcTemplate.query(queryFilmsSelectAndGroupByYear, (rs, rowNum) -> makeFilm(rs), directorId);
-        }
+    public List<Film> getFilmsByDirector(int directorId) {
+        String queryFilmSelect = "SELECT * " +
+                "FROM film AS f " +
+                "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +
+                "WHERE fd.director_id = ?;";
+        return jdbcTemplate.query(queryFilmSelect, (rs, rowNum) -> makeFilm(rs), directorId);
     }
 
     public void removeFilm(int filmId) {

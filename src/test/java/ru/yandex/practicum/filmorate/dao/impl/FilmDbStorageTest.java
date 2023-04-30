@@ -153,12 +153,12 @@ public class FilmDbStorageTest {
 
     @Test
     void getDirectorsOfFilm() {
-        List<Film> films1 = (List<Film>) filmDbStorage.getFilmsByDirector(1, "year");
+        List<Film> films1 = (List<Film>) filmDbStorage.getFilmsByDirector(1);
         films1.stream()
                 .forEach(System.out::println);
         assertEquals(films1.size(), 1);
 
-        List<Film> films2 = (List<Film>) filmDbStorage.getFilmsByDirector(2, "likes");
+        List<Film> films2 = (List<Film>) filmDbStorage.getFilmsByDirector(2);
         films2.stream()
                 .forEach(System.out::println);
         assertEquals(films2.size(), 2);
@@ -176,39 +176,11 @@ public class FilmDbStorageTest {
 
     @Test
     void getFilmsByDirector() {
-        assertEquals(filmDbStorage.getFilmsByDirector(1, "likes").size(),
-                filmDbStorage.getFilmsByDirector(1, "year").size(),
-                "Количество фильмов режиссера с id = 1, отсортированных по лайкам, не совпадает с количеством " +
-                        "его же фильмов, отсортированных по годам");
-        assertTrue(filmDbStorage.getFilmsByDirector(2, "year").size() == 2,
+        assertTrue(filmDbStorage.getFilmsByDirector(2).size() == 2,
                 "Количество фильмов режиссера с id = 2 в БД не совпадает с добавленным количеством фильмов " +
                         "в БД этого режиссера");
 
-        assertTrue(filmDbStorage.getFilmsByDirector(3333, "year").isEmpty(),
+        assertTrue(filmDbStorage.getFilmsByDirector(3333).isEmpty(),
                 "Из БД получены фильмы несуществующего режиссера");
-    }
-
-    @Test
-    void getFilmsByDirectorSortByLikes() {
-        List<Film> sortedByLikesFilmsOfDirector2 = List.of(
-                filmDbStorage.getById(3).get(),
-                filmDbStorage.getById(2).get());
-
-        assertEquals(filmDbStorage.getFilmsByDirector(2, "likes"),
-                sortedByLikesFilmsOfDirector2,
-                "Полученный из БД список фильмов режиссера с id = 2, отсортированных по лайкам, не совпадает " +
-                        "с фактическим списком фильмов этого режиссера, отсортированных по лайкам");
-    }
-
-    @Test
-    void getFilmsByDirectorSortByYear() {
-        List<Film> sortedByLikesFilmsOfDirector2 = List.of(
-                filmDbStorage.getById(3).get(),
-                filmDbStorage.getById(2).get());
-
-        assertEquals(filmDbStorage.getFilmsByDirector(2, "year"),
-                sortedByLikesFilmsOfDirector2,
-                "Полученный из БД список фильмов режиссера с id = 2, отсортированных по годам, не совпадает " +
-                        "с фактическим списком фильмов этого режиссера, отсортированных по годам");
     }
 }

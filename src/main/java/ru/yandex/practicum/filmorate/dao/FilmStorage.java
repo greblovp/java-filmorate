@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface FilmStorage {
@@ -19,7 +20,7 @@ public interface FilmStorage {
 
     public void removeLike(Film film, User user);
 
-    Collection<Film> getFilmsByDirector(int directorId, String sortType);
+    List<Film> getFilmsByDirector(int directorId);
 
     public void removeFilm(int filmId);
 }

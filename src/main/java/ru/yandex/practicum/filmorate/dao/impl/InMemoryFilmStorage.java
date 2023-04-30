@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
+import java.util.List;
 
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmStorage {
@@ -20,7 +20,7 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
     }
 
     @Override
-    public Collection<Film> getFilmsByDirector(int directorId, String sortType) {
+    public List<Film> getFilmsByDirector(int directorId) {
         return null; // это заглушка
     }
 

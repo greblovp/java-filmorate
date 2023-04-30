@@ -13,8 +13,7 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,7 +79,21 @@ public class FilmService {
     public Collection<Film> getFilmsByDirector(int directorId, String sortBy) {
         directorService.checkIfDirectorExists(directorId);
         checkSortByParam(sortBy);
-        return filmStorage.getFilmsByDirector(directorId, sortBy);
+        List<Film> films = new ArrayList<>(filmStorage.getFilmsByDirector(directorId));
+        if (sortBy.equals("likes")) {
+            Collections.sort(films, this::compare);
+        } else {
+            Collections.sort(films,
+                    (film1, film2) -> {
+                        if (film1.getReleaseDate().isBefore(film2.getReleaseDate())) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                    });
+        }
+
+        return films;
     }
 
     public void removeFilm(int filmId) {

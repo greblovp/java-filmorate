@@ -255,11 +255,11 @@ class FilmServiceTest {
                 .likes(new HashSet<>(Arrays.asList(1, 2)))
                 .build();
 
-        when(filmStorage.getFilmsByDirector(1, "likes")).thenReturn(List.of(film2, film1));
+        when(filmStorage.getFilmsByDirector(1)).thenReturn(List.of(film2, film1));
 
         Collection<Film> result = filmService.getFilmsByDirector(1, "likes");
 
-        verify(filmStorage).getFilmsByDirector(1, "likes");
+        verify(filmStorage).getFilmsByDirector(1);
 
         assertEquals(2, result.size());
         assertEquals(List.of(film2, film1), result);
@@ -286,11 +286,11 @@ class FilmServiceTest {
                 .likes(new HashSet<>(Arrays.asList(1, 2)))
                 .build();
 
-        when(filmStorage.getFilmsByDirector(1, "year")).thenReturn(List.of(film1, film2));
+        when(filmStorage.getFilmsByDirector(1)).thenReturn(List.of(film1, film2));
 
         Collection<Film> result = filmService.getFilmsByDirector(1, "year");
 
-        verify(filmStorage).getFilmsByDirector(1, "year");
+        verify(filmStorage).getFilmsByDirector(1);
 
         assertEquals(2, result.size());
         assertEquals(List.of(film1, film2), result);
