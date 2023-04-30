@@ -39,11 +39,8 @@ public class FilmController {
                                        @RequestParam(defaultValue = "0") String genreId,
                                        @RequestParam(defaultValue = "0") String year) {
         log.info("Вывести ТОП {} фильмов, жанр: {}, год: {}", count, genreId, year);
-        if ("0".equals(genreId) && "0".equals(year)) {
-            return filmService.getTop(count);
-        }
-        log.info("Получаем список из {} популярных фильмов", count);
-        return filmService.getPopularFilmsByGenreAndYear(count, genreId == null ? 0 : Integer.parseInt(genreId),
+
+        return filmService.getTop(count, genreId == null ? 0 : Integer.parseInt(genreId),
                 year == null ? 0 : Integer.parseInt(year));
     }
 

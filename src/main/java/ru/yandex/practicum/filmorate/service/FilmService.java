@@ -5,12 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.dao.FilmStorage;
-import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -68,20 +68,20 @@ public class FilmService {
         log.debug("Удален лайк от пользователя ID = {} в фильме: {}", userId, film);
     }
 
-    public Collection<Film> getTop(int count) {
-        return filmStorage.get().stream()
-                .sorted(this::compare)
-                .limit(count)
-                .collect(Collectors.toList());
+    public Collection<Film> getTop(int count, int genreId, int year) {
+        log.info("Получаем список из {} популярных фильмов", count);
+        if (genreId == 0 && year == 0) {
+            return filmStorage.get().stream()
+                    .sorted(this::compare)
+                    .limit(count)
+                    .collect(Collectors.toList());
+        }
+        return filmStorage.getPopularByGenreAndYear(count, genreId, year);
     }
 
     public Collection<Film> getFilmsByDirector(int directorId, String sortBy) {
         checkSortByParam(sortBy);
         return filmStorage.getFilmsByDirector(directorId, sortBy);
-    }
-
-    public Collection<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year) {
-        return filmStorage.getPopularByGenreAndYear(count, genreId, year);
     }
 
     public void removeFilm(int filmId) {
