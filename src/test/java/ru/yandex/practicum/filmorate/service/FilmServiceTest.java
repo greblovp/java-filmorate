@@ -148,7 +148,7 @@ class FilmServiceTest {
 
         Collection<Film> top = filmService.getTop(3, 0, 0);
 
-        verify(filmStorage).getPopularByGenreAndYear(3 ,0, 0);
+        verify(filmStorage).getPopularByGenreAndYear(3, 0, 0);
         assertEquals(2, top.size());
         assertEquals(List.of(film, popularFilm), top);
     }
