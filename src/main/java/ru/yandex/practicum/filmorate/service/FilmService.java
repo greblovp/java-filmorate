@@ -13,8 +13,11 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -70,13 +73,7 @@ public class FilmService {
     }
 
     public Collection<Film> getTop(int count, int genreId, int year) {
-        log.info("Получаем список из {} популярных фильмов", count);
-        if (genreId == 0 && year == 0) {
-            return filmStorage.get().stream()
-                    .sorted(this::compare)
-                    .limit(count)
-                    .collect(Collectors.toList());
-        }
+        log.info("Получаем список из {} популярных фильмов, жанр {}, год {}", count, genreId, year);
         return filmStorage.getPopularByGenreAndYear(count, genreId, year);
     }
 

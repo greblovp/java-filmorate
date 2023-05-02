@@ -8,12 +8,24 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.jdbc.SqlGroup;
-import ru.yandex.practicum.filmorate.model.*;
+
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -183,6 +195,12 @@ public class FilmDbStorageTest {
         Collection<Film> films = filmDbStorage.getPopularByGenreAndYear(10, 0, 2021);
         assertEquals(1, films.size());
         assertEquals(2, ((List<Film>)films).get(0).getId());
+    }
+
+    @Test
+    void testgetPopular() {
+        Collection<Film> films = filmDbStorage.getPopularByGenreAndYear(10, 0, 0);
+        assertEquals(3, films.size());
     }
 
     @Test

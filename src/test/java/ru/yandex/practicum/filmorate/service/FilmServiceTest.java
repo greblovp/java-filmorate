@@ -12,11 +12,17 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class FilmServiceTest {
 
@@ -138,24 +144,24 @@ class FilmServiceTest {
 
     @Test
     void getTop() {
-        when(filmStorage.get()).thenReturn(List.of(film, popularFilm));
+        when(filmStorage.getPopularByGenreAndYear(3, 0, 0)).thenReturn(List.of(film, popularFilm));
 
         Collection<Film> top = filmService.getTop(3, 0, 0);
 
-        verify(filmStorage).get();
+        verify(filmStorage).getPopularByGenreAndYear(3 ,0, 0);
         assertEquals(2, top.size());
-        assertEquals(List.of(popularFilm, film), top);
+        assertEquals(List.of(film, popularFilm), top);
     }
 
     @Test
     void getTopWithLimit() {
-        when(filmStorage.get()).thenReturn(List.of(film, popularFilm));
+        when(filmStorage.getPopularByGenreAndYear(2, 0, 0)).thenReturn(List.of(film, popularFilm));
 
-        Collection<Film> top = filmService.getTop(1, 0, 0);
+        Collection<Film> top = filmService.getTop(2, 0, 0);
 
-        verify(filmStorage).get();
-        assertEquals(1, top.size());
-        assertEquals(List.of(popularFilm), top);
+        verify(filmStorage).getPopularByGenreAndYear(2, 0, 0);
+        assertEquals(2, top.size());
+        assertEquals(List.of(film, popularFilm), top);
     }
 
     @Test
