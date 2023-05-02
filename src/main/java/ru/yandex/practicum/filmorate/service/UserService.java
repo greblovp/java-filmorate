@@ -4,12 +4,16 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +25,10 @@ public class UserService {
     @Qualifier("userDbStorage")
     @NonNull
     private final UserStorage userStorage;
+
+    @Qualifier("filmDbStorage")
+    @NonNull
+    private final FilmStorage filmStorage;
 
     public Collection<User> findAll() {
         return userStorage.get();
@@ -90,6 +98,16 @@ public class UserService {
         userStorage.removeUser(userId);
 
         log.debug("Удален пользователь {}", user);
+    }
+
+    public Collection<Film> getFilmRecommendations(int userId) {
+        checkUserId(userId);
+        try {
+            return filmStorage.getFilmRecommendations(userId);
+        } catch (EmptyResultDataAccessException e) {
+            log.info("Рекомедации по фильмам для пользователя с ID = {} отсутствуют", userId);
+            return Collections.emptyList();
+        }
     }
 
     private User checkUserId(int id) {

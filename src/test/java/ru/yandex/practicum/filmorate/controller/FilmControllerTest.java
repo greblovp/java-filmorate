@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.enums.ActionType;
 import ru.yandex.practicum.filmorate.enums.EventType;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.*;
 
@@ -228,5 +229,32 @@ class FilmControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
         verify(filmService, times(1)).getTop(count, genreId, year);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testGetCommonFilms() {
+        int userId = 1;
+        int friendId = 2;
+        when(filmService.getCommonFilms(userId, friendId)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/common?userId=" + userId + "&friendId=" + friendId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+        verify(filmService, times(1)).getCommonFilms(userId, friendId);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testGetCommonFilmsForNotExistedUser() {
+        int userId = 123;
+        int friendId = 2;
+        when(filmService.getCommonFilms(userId, friendId))
+                .thenThrow(new UserNotFoundException(String.format("Пользователь с ID = %d не найден.", userId)));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/common?userId=" + userId + "&friendId=" + friendId))
+                .andExpect(status().isNotFound());
     }
 }

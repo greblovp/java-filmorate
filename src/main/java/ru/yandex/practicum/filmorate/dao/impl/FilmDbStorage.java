@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -186,6 +187,59 @@ public class FilmDbStorage implements FilmStorage {
                         "WHERE film_id = ?";
 
         jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    @Override
+    public Collection<Film> getFilmRecommendations(int userId) throws EmptyResultDataAccessException {
+        String sqlQuery =
+                "WITH rec_user AS " +
+                        "(SELECT t2.user_id " +
+                        "FROM film_like t1 " +
+                        "INNER JOIN film_like t2 ON t1.film_id = t2.film_id " +
+                        "AND t2.user_id <> t1.user_id " +
+                        "WHERE t1.user_id = ? " +
+                        "GROUP BY t2.user_id " +
+                        "ORDER BY COUNT(t2.film_id) DESC " +
+                        "LIMIT 1) " +
+
+                        "SELECT rec.film_id " +
+                        "FROM film_like rec " +
+                        "INNER JOIN rec_user ON rec.user_id = rec_user.user_id " +
+                        "LEFT JOIN film_like base ON rec.film_id = base.film_id " +
+                        "AND base.user_id = ? " +
+                        "WHERE 1=1 " +
+                        "AND base.film_id IS NULL";
+
+        return jdbcTemplate.queryForList(sqlQuery,
+                        Integer.class,
+                        userId,
+                        userId)
+                .stream()
+                .map(this::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        String sqlQuery =
+                "SELECT film_id " +
+                        "FROM film_like " +
+                        "WHERE user_id = ? " +
+                        "INTERSECT " +
+                        "SELECT film_id " +
+                        "FROM film_like " +
+                        "WHERE user_id = ?";
+        return jdbcTemplate.queryForList(sqlQuery,
+                        Integer.class,
+                        userId,
+                        friendId)
+                .stream()
+                .map(this::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {

@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.exception.UserValidationException;
 import ru.yandex.practicum.filmorate.enums.ActionType;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.enums.EventType;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -87,6 +88,12 @@ public class UserController {
         generateCustomValidateException(user, bindingResult);
         validateService.validateUser(user);
         return userService.updateUser(user);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public Collection<Film> getFilmRecommendations(@PathVariable int userId) {
+        log.info("Получить список рекомендованных фильмов для пользователя с ID = {}", userId);
+        return userService.getFilmRecommendations(userId);
     }
 
     @DeleteMapping("/{userId}")

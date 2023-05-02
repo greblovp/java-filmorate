@@ -259,4 +259,18 @@ class UserControllerTest {
                 .andExpect(status().isOk());
         verify(userService, times(1)).removeUser(userId);
     }
+
+    @Test
+    public void testGetFilmRecommendations() throws Exception {
+        int userId = 1;
+        mockMvc.perform(get("/users/" + userId + "/recommendations"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetFilmRecommendationsWithNotExistedId() throws Exception {
+        int userId = 123;
+        mockMvc.perform(get("/users" + userId + "/recommendations"))
+                .andExpect(status().isNotFound());
+    }
 }

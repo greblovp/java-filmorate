@@ -105,6 +105,14 @@ public class FilmService {
         log.debug("Удален фильм: {}", film);
     }
 
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        checkUserId(userId);
+        checkUserId(friendId);
+        return filmStorage.getCommonFilms(userId, friendId).stream()
+                .sorted(this::compare)
+                .collect(Collectors.toList());
+    }
+
     private int compare(Film f0, Film f1) {
         return -1 * (f0.getLikes().size() - f1.getLikes().size()); //обратный порядок
     }

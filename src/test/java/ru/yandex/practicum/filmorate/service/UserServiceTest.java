@@ -3,30 +3,26 @@ package ru.yandex.practicum.filmorate.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class UserServiceTest {
 
 
     private final UserStorage userStorage = Mockito.mock(UserStorage.class);
 
-    private final UserService userService = new UserService(userStorage);
+    private final FilmStorage filmStorage = Mockito.mock(FilmStorage.class);
+
+    private final UserService userService = new UserService(userStorage, filmStorage);
 
     private User user = User.builder()
             .email("test1@test.test")
@@ -205,7 +201,6 @@ class UserServiceTest {
 
         assertThrows(UserNotFoundException.class, () -> userService.updateUser(user));
     }
-
 
     @Test
     public void testGetFriends() {
