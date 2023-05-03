@@ -71,4 +71,18 @@ class FilmTest {
         Set<ConstraintViolation<Film>> violationSet = validator.validate(film);
         assertEquals(1, violationSet.size());
     }
+
+    @Test
+    void validateWrongDirectorName() {
+        Film film = Film.builder()
+                .name("name")
+                .description("description")
+                .releaseDate(LocalDate.of(2000, 1, 1))
+                .duration(-100)
+                .directors(Set.of(new Director(1, " ")))
+                .build();
+
+        Set<ConstraintViolation<Film>> violationSet = validator.validate(film);
+        assertEquals(1, violationSet.size());
+    }
 }

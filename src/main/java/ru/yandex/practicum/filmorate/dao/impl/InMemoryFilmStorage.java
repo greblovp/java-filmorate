@@ -7,6 +7,11 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
 
+import java.util.List;
+
+import java.util.Collection;
+import java.util.Collections;
+
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmStorage {
     @Override
@@ -25,7 +30,26 @@ public class InMemoryFilmStorage extends BaseModelStorage<Film> implements FilmS
     }
 
     @Override
-    public Collection<Film> getFilmsByDirector(int directorId, String sortType) {
+    public List<Film> getFilmsByDirector(int directorId) {
         return null; // это заглушка
+    }
+
+    @Deprecated
+    public void removeFilm(int filmId) {
+    }
+
+    @Deprecated
+    public Collection<Film> getPopularByGenreAndYear(int count, int genreId, int year) {
+        return null;
+    }
+
+    @Deprecated
+    public Collection<Film> getFilmRecommendations(int userId) {
+        return Collections.emptyList();
+    }
+
+    @Deprecated
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        return Collections.emptyList();
     }
 }

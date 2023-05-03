@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -19,7 +20,11 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component("filmDbStorage")
@@ -91,26 +96,14 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         int filmId = (int) keyHolder.getKey().longValue();
+        film.setId(filmId);
 
         if (film.getGenres() != null) {
-            String genreSqlQuery =
-                    "INSERT INTO film_x_genre (film_id, genre_id) " +
-                            "VALUES (?, ?)";
-
-            film.getGenres().forEach(genre -> {
-                jdbcTemplate.update(genreSqlQuery,
-                        filmId,
-                        genre.getId());
-            });
+            updateGenresSet(film);
         }
 
         if (film.getDirectors() != null) {
-            String queryDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
-                    "VALUES(?, ?);";
-
-            film.getDirectors().forEach(director -> {
-                jdbcTemplate.update(queryDirectorInsert, filmId, director.getId());
-            });
+            updateDirectorsSet(film);
         }
 
         Film createdFilm = getById(filmId).orElse(null);
@@ -137,36 +130,14 @@ public class FilmDbStorage implements FilmStorage {
             return Optional.empty();
         }
 
-        String genreDeleteSqlQuery =
-                "DELETE FROM film_x_genre " +
-                        "WHERE film_id = ?";
-
-        jdbcTemplate.update(genreDeleteSqlQuery, film.getId());
-
+        deleteOldGenresSet(film);
         if (film.getGenres() != null) {
-            String genreSqlQuery =
-                    "INSERT INTO film_x_genre (film_id, genre_id) " +
-                            "VALUES (?, ?)";
-
-            film.getGenres().forEach(genre -> {
-                jdbcTemplate.update(genreSqlQuery,
-                        film.getId(),
-                        genre.getId());
-            });
+            updateGenresSet(film);
         }
 
-        String queryFilmDirectorDelete = "DELETE FROM film_x_director " +
-                "WHERE film_id = ?;";
-
-        jdbcTemplate.update(queryFilmDirectorDelete, film.getId());
-
+        deleteOldDirectorsSet(film);
         if (film.getDirectors() != null) {
-            String queryFilmDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
-                    "VALUES(?, ?);";
-
-            film.getDirectors().forEach(director -> {
-                jdbcTemplate.update(queryFilmDirectorInsert, film.getId(), director.getId());
-            });
+            updateDirectorsSet(film);
         }
 
         Optional<Film> updatedFilm = this.getById(film.getId());
@@ -192,31 +163,95 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getFilmsByDirector(int directorId, String sortBy) {
-        directorStorage.checkIfDirectorExists(directorId);
-        String queryFilmsSelect = "SELECT * " +
+    public List<Film> getFilmsByDirector(int directorId) {
+        String queryFilmSelect = "SELECT * " +
                 "FROM film AS f " +
                 "LEFT JOIN film_x_director AS fd ON f.film_id = fd.film_id " +
-                "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
-                "WHERE d.director_id = ?;";
+                "WHERE fd.director_id = ?;";
+        return jdbcTemplate.query(queryFilmSelect, (rs, rowNum) -> makeFilm(rs), directorId);
+    }
 
-        List<Film> allFilmsByDirector = jdbcTemplate.query(queryFilmsSelect, (rs, rowNum) -> makeFilm(rs), directorId);
+    public Collection<Film> getPopularByGenreAndYear(int count, int genreId, int year) {
+        List<Film> films;
+        String sqlQuery = "SELECT f.film_id, f.name, f.description, f.release_dt, f.duration, f.rating_id, " +
+                "COUNT(fl.user_id) as likes " +
+                "FROM film f " +
+                "LEFT JOIN film_like fl ON f.film_id=fl.film_id " +
+                "LEFT JOIN film_x_genre fg ON f.film_id=fg.film_id AND fg.genre_id = ?" +
+                "WHERE COALESCE (fg.genre_id, 0) = ?" +
+                "AND EXTRACT (year FROM COALESCE(f.release_dt, '1800-01-01')) = " +
+                "CASE WHEN ? = 0 THEN EXTRACT (year FROM COALESCE(f.release_dt, '1800-01-01')) ELSE ? END " +
+                "GROUP BY f.film_id, f.name, f.description, f.release_dt, f.duration, f.rating_id " +
+                "ORDER BY likes DESC, film_id " +
+                "LIMIT ?";
 
-        if (sortBy.equals("year")) {
-            Collections.sort(allFilmsByDirector,
-                    (film1, film2) -> {
-                        if (film1.getReleaseDate().isAfter(film2.getReleaseDate())) {
-                            return 1;
-                        } else {
-                            return -1;
-                        }
-                    });
-        } else {
-            Collections.sort(allFilmsByDirector,
-                    Comparator.comparingInt(film -> film.getLikes().size()));
+        films = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs), genreId, genreId, year, year, count);
+
+        if (films.isEmpty()) {
+            log.info("Популярные фильмы с жанром {} и годом {} не найдены.", genreId, year);
         }
+        return films;
+    }
 
-        return allFilmsByDirector;
+    public void removeFilm(int filmId) {
+        String sqlQuery =
+                "DELETE FROM film " +
+                        "WHERE film_id = ?";
+
+        jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    @Override
+    public Collection<Film> getFilmRecommendations(int userId) throws EmptyResultDataAccessException {
+        String sqlQuery =
+                "WITH rec_user AS " +
+                        "(SELECT t2.user_id " +
+                        "FROM film_like t1 " +
+                        "INNER JOIN film_like t2 ON t1.film_id = t2.film_id " +
+                        "AND t2.user_id <> t1.user_id " +
+                        "WHERE t1.user_id = ? " +
+                        "GROUP BY t2.user_id " +
+                        "ORDER BY COUNT(t2.film_id) DESC " +
+                        "LIMIT 1) " +
+
+                        "SELECT rec.film_id " +
+                        "FROM film_like rec " +
+                        "INNER JOIN rec_user ON rec.user_id = rec_user.user_id " +
+                        "LEFT JOIN film_like base ON rec.film_id = base.film_id " +
+                        "AND base.user_id = ? " +
+                        "WHERE 1=1 " +
+                        "AND base.film_id IS NULL";
+
+        return jdbcTemplate.queryForList(sqlQuery,
+                        Integer.class,
+                        userId,
+                        userId)
+                .stream()
+                .map(this::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        String sqlQuery =
+                "SELECT film_id " +
+                        "FROM film_like " +
+                        "WHERE user_id = ? " +
+                        "INTERSECT " +
+                        "SELECT film_id " +
+                        "FROM film_like " +
+                        "WHERE user_id = ?";
+        return jdbcTemplate.queryForList(sqlQuery,
+                        Integer.class,
+                        userId,
+                        friendId)
+                .stream()
+                .map(this::getById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
@@ -229,7 +264,6 @@ public class FilmDbStorage implements FilmStorage {
                 .mpa(mpaStorage.getById(rs.getInt("rating_id")).orElseGet(null))
                 .genres(getGenresByFilmId(filmId))
                 .likes(getLikesByFilmId(filmId))
-                .directors(getDirectorsByFilmId(filmId))
                 .build();
         film.setId(filmId);
         return film;
@@ -270,4 +304,31 @@ public class FilmDbStorage implements FilmStorage {
                 .filter(director -> directorsIds.contains(director.getId()))
                 .collect(Collectors.toSet());
     }
-}
+
+    private void updateDirectorsSet(Film film) {
+        String queryFilmDirectorInsert = "INSERT INTO film_x_director(film_id, director_id) " +
+                "VALUES(?, ?);";
+
+        film.getDirectors().forEach(director -> {
+            jdbcTemplate.update(queryFilmDirectorInsert, film.getId(), director.getId());
+        });
+    }
+
+    private void updateGenresSet(Film film) {
+        String genreSqlQuery =
+                "INSERT INTO film_x_genre (film_id, genre_id) " +
+                        "VALUES (?, ?)";
+
+        film.getGenres().forEach(genre -> {
+            jdbcTemplate.update(genreSqlQuery,
+                    film.getId(),
+                    genre.getId());
+        });
+    }
+
+    private void deleteOldDirectorsSet(Film film) {
+        String queryFilmDirectorDelete = "DELETE FROM film_x_director " +
+                "WHERE film_id = ?;";
+
+        jdbcTemplate.update(queryFilmDirectorDelete, film.getId());
+    }

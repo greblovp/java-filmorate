@@ -35,6 +35,12 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler()
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleReviewNotFound(final ReviewNotFoundException e) {
+        return new ErrorResponse("Отзыв не найден", e.getMessage());
+    }
+
+    @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidEmail(final FilmValidationException e) {
         return new ErrorResponse("Ошибка в заполнении полей фильма", e.getMessage());
@@ -54,8 +60,20 @@ public class ErrorHandler {
 
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidSortBy(final SortByValidationException e) {
+        return new ErrorResponse("Некорректный тип сортировки", e.getMessage());
+    }
+
+    @ExceptionHandler()
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIncorrectParameter(final UserValidationException e) {
         return new ErrorResponse("Ошибка в заполнении полей пользователя", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNotNullReviewValidationException(final NotNullReviewValidationException e) {
+        return new ErrorResponse("Ошибка в заполнении полей отзыва", e.getMessage());
     }
 
     @ExceptionHandler()

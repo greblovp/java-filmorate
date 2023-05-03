@@ -118,6 +118,14 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sqlQuery, user.getId(), friend.getId());
     }
 
+    @Override
+    public void removeUser(int userId) {
+        String sqlQuery =
+                "DELETE FROM \"user\" " +
+                        "WHERE user_id = ?";
+        jdbcTemplate.update(sqlQuery, userId);
+    }
+
     private User makeUser(ResultSet rs) throws SQLException {
         int userId = rs.getInt("user_id");
         User user = User.builder()
