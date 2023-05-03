@@ -15,4 +15,10 @@ public class InMemoryUserStorage extends BaseModelStorage<User> implements UserS
     public void removeFriend(User user, User friend) {
         user.getFriends().remove(friend.getId());
     }
+
+    @Override
+    @Deprecated
+    public void removeUser(int userId) {
+        throw new UnsupportedOperationException("Реализация метода существует только при работе с БД");
+    }
 }

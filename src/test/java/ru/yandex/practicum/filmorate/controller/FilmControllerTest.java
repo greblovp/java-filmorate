@@ -4,16 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.enums.ActionType;
+import ru.yandex.practicum.filmorate.enums.EventType;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.*;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +29,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest
+@SpringBootTest
+@AutoConfigureMockMvc
 class FilmControllerTest {
 
     @MockBean
@@ -30,11 +38,15 @@ class FilmControllerTest {
     @MockBean
     private ValidateService validateService;
     @MockBean
+    private EventService eventService;
+    @MockBean
     private UserService userService;
     @MockBean
     private MPAService mpaService;
     @MockBean
     private GenreService genreService;
+    @MockBean
+    private DirectorService directorService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -43,7 +55,7 @@ class FilmControllerTest {
 
     @SneakyThrows
     @Test
-    void testgetFilms() {
+    void testGetFilms() {
         Film filmToCreate = Film.builder().name("name").description("description").releaseDate(LocalDate.of(2000, 1, 1)).duration(100).build();
         when(filmService.findAll()).thenReturn(List.of(filmToCreate));
 
@@ -127,12 +139,12 @@ class FilmControllerTest {
     @SneakyThrows
     public void testGetPopular() {
         int count = 5;
-        when(filmService.getTop(count)).thenReturn(Collections.emptyList());
+        when(filmService.getTop(count, 0, 0)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/films/popular?count=" + count))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
-        verify(filmService, times(1)).getTop(count);
+        verify(filmService, times(1)).getTop(count, 0, 0);
     }
 
     @Test
@@ -144,6 +156,7 @@ class FilmControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.put("/films/" + filmId + "/like/" + userId))
                 .andExpect(status().isOk());
         verify(filmService, times(1)).addLike(filmId, userId);
+        verify(eventService, times(1)).createEvent(userId, ActionType.ADD, EventType.LIKE, filmId);
     }
 
     @Test
@@ -155,6 +168,145 @@ class FilmControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/films/" + filmId + "/like/" + userId))
                 .andExpect(status().isOk());
         verify(filmService, times(1)).removeLike(filmId, userId);
+        verify(eventService, times(1)).createEvent(userId, ActionType.REMOVE, EventType.LIKE, filmId);
     }
 
+    @Test
+    @SneakyThrows
+    public void testRemoveFilm() {
+        int filmId = 1;
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/films/" + filmId))
+                .andExpect(status().isOk());
+        verify(filmService, times(1)).removeFilm(filmId);
+    }
+
+    @Test
+    @SneakyThrows
+    void getFilmsByDirectorSortedByLikesOrYear() {
+        Film filmToCreate1 = Film.builder()
+                .name("name1")
+                .description("description1")
+                .releaseDate(LocalDate.of(2001, 1, 1))
+                .duration(100)
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Director1"))))
+                .build();
+        Film filmToCreate2 = Film.builder()
+                .name("name2")
+                .description("description2")
+                .releaseDate(LocalDate.of(2002, 2, 2))
+                .duration(200)
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Director1"))))
+                .build();
+
+        when(filmService.getFilmsByDirector(1, "likes"))
+                .thenReturn(List.of(filmToCreate1, filmToCreate2));
+
+        String response = mockMvc.perform(
+                        get("/films/director/" + 1 + "?sortBy=likes")
+                                .contentType("application/json"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        verify(filmService).getFilmsByDirector(1, "likes");
+        assertEquals(objectMapper.writeValueAsString(List.of(filmToCreate1, filmToCreate2)), response);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testGetPopularByGenreAndYear() {
+        int count = 5;
+        int genreId = 1;
+        int year = 1999;
+        when(filmService.getTop(count, genreId, year)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/films/popular?count=" + count + "&genreId=" + genreId +
+                        "&year=" + year))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+        verify(filmService, times(1)).getTop(count, genreId, year);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testGetCommonFilms() {
+        int userId = 1;
+        int friendId = 2;
+        when(filmService.getCommonFilms(userId, friendId)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/common?userId=" + userId + "&friendId=" + friendId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+        verify(filmService, times(1)).getCommonFilms(userId, friendId);
+    }
+
+    @Test
+    @SneakyThrows
+    public void testGetCommonFilmsForNotExistedUser() {
+        int userId = 123;
+        int friendId = 2;
+        when(filmService.getCommonFilms(userId, friendId))
+                .thenThrow(new UserNotFoundException(String.format("Пользователь с ID = %d не найден.", userId)));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/common?userId=" + userId + "&friendId=" + friendId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @SneakyThrows
+    void testSearchTitle() {
+        String query = "film";
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/films/search?query=" + query + "&by=title"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(filmService, times(1)).searchFilms(query, false, true);
+    }
+
+    @Test
+    @SneakyThrows
+    void testSearchDirector() {
+        String query = "film";
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/search?query=" + query + "&by=director"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(filmService, times(1)).searchFilms(query, true, false);
+    }
+
+    @Test
+    @SneakyThrows
+    void testSearchBoth() {
+        String query = "film";
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/search?query=" + query + "&by=title, director"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(filmService, times(1)).searchFilms(query, true, true);
+    }
+
+    @Test
+    @SneakyThrows
+    void testSearchNone() {
+        String query = "film";
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/search?query=" + query))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(filmService, times(1)).searchFilms(query, false, false);
+    }
 }

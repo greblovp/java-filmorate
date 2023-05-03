@@ -1,12 +1,12 @@
-insert into genre (genre_nm) values ('Комедия');
-insert into genre (genre_nm) values ('Драма');
-insert into genre (genre_nm) values ('Мультфильм');
-insert into genre (genre_nm) values ('Триллер');
-insert into genre (genre_nm) values ('Документальный');
-insert into genre (genre_nm) values ('Боевик');
+insert into genre (name) values ('Комедия');
+insert into genre (name) values ('Драма');
+insert into genre (name) values ('Мультфильм');
+insert into genre (name) values ('Триллер');
+insert into genre (name) values ('Документальный');
+insert into genre (name) values ('Боевик');
 
-insert into rating (rating_cd) values ('G');
-insert into rating (rating_cd) values ('PG');
-insert into rating (rating_cd) values ('PG-13');
-insert into rating (rating_cd) values ('R');
-insert into rating (rating_cd) values ('NC-17');
+insert into rating (name) values ('G');
+insert into rating (name) values ('PG');
+insert into rating (name) values ('PG-13');
+insert into rating (name) values ('R');
+insert into rating (name) values ('NC-17');

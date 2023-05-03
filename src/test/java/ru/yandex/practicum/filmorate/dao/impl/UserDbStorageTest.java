@@ -27,7 +27,6 @@ class UserDbStorageTest {
 
     private final UserDbStorage userDbStorage;
 
-
     @Test
     void testGetUsers() {
         Collection<User> users = userDbStorage.get();
@@ -129,4 +128,13 @@ class UserDbStorageTest {
         assertFalse(userWithOutFriend.getFriends().contains(3));
     }
 
+    @Test
+    public void testRemoveUser() {
+        User user = userDbStorage.getById(1).orElse(null);
+        assertNotNull(user);
+
+        userDbStorage.removeUser(1);
+        user = userDbStorage.getById(1).orElse(null);
+        assertNull(user);
+    }
 }

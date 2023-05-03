@@ -5,15 +5,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.SortByValidationException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,9 +31,18 @@ public class FilmService {
     @Qualifier("userDbStorage")
     @NonNull
     private final UserStorage userStorage;
+    @NonNull
+    private final DirectorService directorService;
 
     public Collection<Film> findAll() {
         return filmStorage.get();
+    }
+
+    public Collection<Film> searchFilms(String query, Boolean director, Boolean film) {
+        return filmStorage.search(query, director, film)
+                .stream()
+                .sorted(this::compare)
+                .collect(Collectors.toList());
     }
 
     public Film findById(int filmId) {
@@ -67,10 +80,44 @@ public class FilmService {
         log.debug("Удален лайк от пользователя ID = {} в фильме: {}", userId, film);
     }
 
-    public Collection<Film> getTop(int count) {
-        return filmStorage.get().stream()
+    public Collection<Film> getTop(int count, int genreId, int year) {
+        log.info("Получаем список из {} популярных фильмов, жанр {}, год {}", count, genreId, year);
+        return filmStorage.getPopularByGenreAndYear(count, genreId, year);
+    }
+
+    public Collection<Film> getFilmsByDirector(int directorId, String sortBy) {
+        directorService.checkIfDirectorExists(directorId);
+        checkSortByParam(sortBy);
+        List<Film> films = new ArrayList<>(filmStorage.getFilmsByDirector(directorId));
+        if (sortBy.equals("likes")) {
+            Collections.sort(films, this::compare);
+        } else {
+            Collections.sort(films,
+                    (film1, film2) -> {
+                        if (film1.getReleaseDate().isBefore(film2.getReleaseDate())) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                    });
+        }
+
+        return films;
+    }
+
+    public void removeFilm(int filmId) {
+        Film film = checkFilmId(filmId);
+
+        filmStorage.removeFilm(filmId);
+
+        log.debug("Удален фильм: {}", film);
+    }
+
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        checkUserId(userId);
+        checkUserId(friendId);
+        return filmStorage.getCommonFilms(userId, friendId).stream()
                 .sorted(this::compare)
-                .limit(count)
                 .collect(Collectors.toList());
     }
 
@@ -84,5 +131,11 @@ public class FilmService {
 
     private Film checkFilmId(int id) {
         return filmStorage.getById(id).orElseThrow(() -> new FilmNotFoundException("Фильм с ID = " + id + " не найден."));
+    }
+
+    private void checkSortByParam(String sortType) {
+        if (!sortType.equals("year") && !sortType.equals("likes")) {
+            throw new SortByValidationException("Некорректно введен параметр сортировки.");
+        }
     }
 }

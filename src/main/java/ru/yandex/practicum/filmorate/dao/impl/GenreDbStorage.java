@@ -47,6 +47,6 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     private Genre makeGenre(ResultSet rs) throws SQLException {
-        return new Genre(rs.getInt("genre_id"), rs.getString("genre_nm"));
+        return new Genre(rs.getInt("genre_id"), rs.getString("name"));
     }
 }
