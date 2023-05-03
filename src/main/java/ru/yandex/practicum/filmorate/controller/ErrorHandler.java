@@ -76,6 +76,12 @@ public class ErrorHandler {
         return new ErrorResponse("Ошибка в заполнении полей отзыва", e.getMessage());
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnsupportedOperationException(final UnsupportedOperationException e) {
+        return new ErrorResponse("Данная функция не поддерживается", e.getMessage());
+    }
+
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleError(final Throwable e) {
