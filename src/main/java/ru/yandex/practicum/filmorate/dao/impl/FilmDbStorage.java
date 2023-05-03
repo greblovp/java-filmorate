@@ -48,15 +48,15 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> search(String query, Boolean director, Boolean film) {
         StringBuilder sqlQuery = new StringBuilder();
-        sqlQuery.append("select * from FILM F " +
-                "left join FILM_X_DIRECTOR FXD on F.FILM_ID = FXD.FILM_ID " +
-                "left join DIRECTOR D on D.DIRECTOR_ID = FXD.DIRECTOR_ID " +
+        sqlQuery.append("SELECT * FROM film f " +
+                "LEFT JOIN film_x_director fxd ON f.film_id = fxd.film_id " +
+                "LEFT JOIN director d ON d.director_id = fxd.director_id " +
                 "WHERE 1=1 ");
         if (director && film)
-            sqlQuery.append("AND (d.NAME ILIKE '%").append(query).append("%'").append("OR f.name ILIKE '%").append(query).append("%')");
+            sqlQuery.append("AND (d.name ILIKE '%").append(query).append("%'").append("OR f.name ILIKE '%").append(query).append("%')");
         else {
-            if (director) sqlQuery.append("AND d.NAME ILIKE '%").append(query).append("%'");
-            if (film) sqlQuery.append("AND f.NAME ILIKE '%").append(query).append("%'");
+            if (director) sqlQuery.append("AND d.name ILIKE '%").append(query).append("%'");
+            if (film) sqlQuery.append("AND f.name ILIKE '%").append(query).append("%'");
         }
 
         return jdbcTemplate.query(sqlQuery.toString(), (rs, rowNum) -> makeFilm(rs));
