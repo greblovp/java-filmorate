@@ -48,11 +48,16 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> search(String query, Boolean director, Boolean film) {
         StringBuilder sqlQuery = new StringBuilder();
-        sqlQuery.append("SELECT *" +
-                        "FROM film " +
-                "WHERE 1=1");
-        if (director) sqlQuery.append("AND director ILIKE '%").append(query).append("%'");
-        if (film) sqlQuery.append("AND description ILIKE '%").append(query).append("%'");
+        sqlQuery.append("select * from FILM " +
+                "left join FILM_X_DIRECTOR FXD on FILM.FILM_ID = FXD.FILM_ID " +
+                "left join DIRECTOR D on D.DIRECTOR_ID = FXD.DIRECTOR_ID " +
+                "WHERE 1=1 ");
+        if (director && film)
+            sqlQuery.append("AND (d.NAME ILIKE '%").append(query).append("%'").append("OR description ILIKE '%").append(query).append("%')");
+        else {
+            if (director) sqlQuery.append("AND d.NAME ILIKE '%").append(query).append("%'");
+            if (film) sqlQuery.append("AND description ILIKE '%").append(query).append("%'");
+        }
 
         return jdbcTemplate.query(sqlQuery.toString(), (rs, rowNum) -> makeFilm(rs));
     }
@@ -264,6 +269,7 @@ public class FilmDbStorage implements FilmStorage {
                 .mpa(mpaStorage.getById(rs.getInt("rating_id")).orElseGet(null))
                 .genres(getGenresByFilmId(filmId))
                 .likes(getLikesByFilmId(filmId))
+                .directors(getDirectorsByFilmId(filmId))
                 .build();
         film.setId(filmId);
         return film;
@@ -332,3 +338,12 @@ public class FilmDbStorage implements FilmStorage {
 
         jdbcTemplate.update(queryFilmDirectorDelete, film.getId());
     }
+
+    private void deleteOldGenresSet(Film film) {
+        String genreDeleteSqlQuery =
+                "DELETE FROM film_x_genre " +
+                        "WHERE film_id = ?";
+
+        jdbcTemplate.update(genreDeleteSqlQuery, film.getId());
+    }
+}

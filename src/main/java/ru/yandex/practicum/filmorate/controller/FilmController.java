@@ -36,10 +36,10 @@ public class FilmController {
     private final ValidateService validateService;
     private final EventService eventService;
 
-    @GetMapping("/search?query={query}&by=director,title")
-    public Collection<Film> search(@PathVariable String query, @RequestParam(name="by") List<String> by) {
+    @GetMapping("/search")
+    public Collection<Film> search(@RequestParam(name = "query") String query, @RequestParam(name = "by") List<String> by) {
         log.info("Вывести фильмы по условиям" + by);
-        return filmService.searchFilms(query, by.contains("director"), by.contains("film"));
+        return filmService.searchFilms(query, by.contains("director"), by.contains("title"));
     }
 
     @GetMapping

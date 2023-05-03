@@ -39,7 +39,10 @@ public class FilmService {
     }
 
     public Collection<Film> searchFilms(String query, Boolean director, Boolean film) {
-        return filmStorage.search(query, director, film);
+        return filmStorage.search(query, director, film)
+                .stream()
+                .sorted(this::compare)
+                .collect(Collectors.toList());
     }
 
     public Film findById(int filmId) {
@@ -116,11 +119,6 @@ public class FilmService {
         return filmStorage.getCommonFilms(userId, friendId).stream()
                 .sorted(this::compare)
                 .collect(Collectors.toList());
-    }
-
-    public Collection<Film> getFilmsByDirector(int directorId, String sortBy) {
-        checkSortByParam(sortBy);
-        return filmStorage.getFilmsByDirector(directorId, sortBy);
     }
 
     private int compare(Film f0, Film f1) {
