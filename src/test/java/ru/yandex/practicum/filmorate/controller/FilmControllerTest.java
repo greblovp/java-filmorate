@@ -257,4 +257,56 @@ class FilmControllerTest {
                         .get("/films/common?userId=" + userId + "&friendId=" + friendId))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @SneakyThrows
+    void testSearchTitle() {
+        String query = "film";
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/films/search?query=" + query + "&by=title"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(filmService, times(1)).searchFilms(query, false, true);
+    }
+
+    @Test
+    @SneakyThrows
+    void testSearchDirector() {
+        String query = "film";
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/search?query=" + query + "&by=director"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(filmService, times(1)).searchFilms(query, true, false);
+    }
+
+    @Test
+    @SneakyThrows
+    void testSearchBoth() {
+        String query = "film";
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/search?query=" + query + "&by=title, director"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(filmService, times(1)).searchFilms(query, true, true);
+    }
+
+    @Test
+    @SneakyThrows
+    void testSearchNone() {
+        String query = "film";
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/films/search?query=" + query))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+
+        verify(filmService, times(1)).searchFilms(query, false, false);
+    }
 }

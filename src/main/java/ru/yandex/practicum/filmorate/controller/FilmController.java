@@ -37,8 +37,8 @@ public class FilmController {
     private final EventService eventService;
 
     @GetMapping("/search")
-    public Collection<Film> search(@RequestParam(name = "query") String query, @RequestParam(name = "by") List<String> by) {
-        log.info("Вывести фильмы по условиям" + by);
+    public Collection<Film> search(@RequestParam(name = "query", defaultValue = "") String query, @RequestParam(name = "by", defaultValue = "") List<String> by) {
+        log.info("Вывести фильмы, содержащие " + query + " в полях: " + by);
         return filmService.searchFilms(query, by.contains("director"), by.contains("title"));
     }
 

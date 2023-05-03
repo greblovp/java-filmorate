@@ -239,4 +239,38 @@ public class FilmDbStorageTest {
         assertTrue(filmDbStorage.getFilmsByDirector(3333).isEmpty(),
                 "Из БД получены фильмы несуществующего режиссера");
     }
+
+    @Test
+    void testSearchByTitle() {
+        Collection<Film> films = filmDbStorage.search("2 film", false, true);
+        assertEquals(1, films.size());
+        assertEquals(films.stream().findFirst(), filmDbStorage.getById(2));
+    }
+
+    @Test
+    void testSearchByDirector() {
+        Collection<Film> films = filmDbStorage.search("Director2", true, false);
+        assertEquals(2, films.size());
+        assertEquals(films.stream().findFirst(), filmDbStorage.getById(2));
+        assertEquals(films.stream().skip(films.size() - 1).findFirst(), filmDbStorage.getById(3));
+    }
+
+    @Test
+    void testSearchByBoth() {
+        Collection<Film> filmsByDirector = filmDbStorage.search("Director2", true, true);
+        assertEquals(2, filmsByDirector.size());
+        assertEquals(filmsByDirector.stream().findFirst(), filmDbStorage.getById(2));
+        assertEquals(filmsByDirector.stream().skip(filmsByDirector.size() - 1).findFirst(), filmDbStorage.getById(3));
+
+        Collection<Film> filmsByTitle = filmDbStorage.search("2 film", true, true);
+        assertEquals(1, filmsByTitle.size());
+        assertEquals(filmsByTitle.stream().findFirst(), filmDbStorage.getById(2));
+    }
+
+    @Test
+    void testSearchByBothEmpty() {
+        Collection<Film> filmsByDirector = filmDbStorage.search("unknown", true, true);
+        assertEquals(0, filmsByDirector.size());
+    }
+
 }

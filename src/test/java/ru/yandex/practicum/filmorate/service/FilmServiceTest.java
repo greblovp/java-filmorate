@@ -313,4 +313,25 @@ class FilmServiceTest {
         assertEquals(1, top.size());
         assertEquals(List.of(popularFilm), top);
     }
+
+    @Test
+    void testSearchFilms() {
+        Film film1 = Film.builder()
+                .name("name1")
+                .description("description1")
+                .releaseDate(LocalDate.of(2001, 1, 1))
+                .duration(100)
+                .directors(new HashSet<>(Arrays.asList(
+                        new Director(1, "Director1"))))
+                .likes(new HashSet<>(Arrays.asList(2)))
+                .build();
+
+        when(filmStorage.search("name1", false, true)).thenReturn(List.of(film1));
+
+        Collection<Film> result = filmService.searchFilms("name1", false, true);
+
+        assertEquals(1, result.size());
+        assertEquals(List.of(film1), result);
+
+    }
 }
